@@ -37,9 +37,9 @@ CREATE TABLE `admin` (
 -- Records of admin
 -- ----------------------------
 BEGIN;
-INSERT INTO `admin` (`adminid`, `username`, `password`, `realname`, `contact`, `addtime`) VALUES ('A20220406113957529', 'admin', 'admin', 'admin', '13888888888', '2026-05-02');
-INSERT INTO `admin` (`adminid`, `username`, `password`, `realname`, `contact`, `addtime`) VALUES ('A20220816220417106', 'tom', '123', '汤姆', '13777777777', '2026-05-19');
-INSERT INTO `admin` (`adminid`, `username`, `password`, `realname`, `contact`, `addtime`) VALUES ('A20220816220431414', 'mike', '123', '麦克', '13555555555', '2026-05-29');
+INSERT INTO `admin` (`adminid`, `username`, `password`, `realname`, `contact`, `addtime`) VALUES ('A20220406113957529', 'admin', 'admin', 'admin', '13888888888', '2026-04-17');
+INSERT INTO `admin` (`adminid`, `username`, `password`, `realname`, `contact`, `addtime`) VALUES ('A20220816220417106', 'tom', '123', '汤姆', '13777777777', '2026-04-06');
+INSERT INTO `admin` (`adminid`, `username`, `password`, `realname`, `contact`, `addtime`) VALUES ('A20220816220431414', 'mike', '123', '麦克', '13555555555', '2026-04-28');
 COMMIT;
 
 -- ----------------------------
@@ -255,9 +255,9 @@ CREATE TABLE `orders` (
 -- Records of orders
 -- ----------------------------
 BEGIN;
-INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406173954757', 'PD20220406173953', 'U20220406165507542', '177.2', '已完成', '2026-05-02', '张三', '中山路28号', '13666666666');
-INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406181823616', 'PD20220406181823', 'U20220406165507542', '105.4', '配送中', '2026-05-27', '张三', '知行东路12号', '13777777777');
-INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220816220826381', 'PD20220816220825', 'U20220406182102296', '63.9', '已完成', '2026-05-24', '李四', '中山路28号', '13777777777');
+INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406173954757', 'PD20220406173953', 'U20220406165507542', '177.2', '已完成', '2026-04-09', '张三', '中山路28号', '13666666666');
+INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406181823616', 'PD20220406181823', 'U20220406165507542', '105.4', '配送中', '2026-04-20', '张三', '知行东路12号', '13777777777');
+INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220816220826381', 'PD20220816220825', 'U20220406182102296', '63.9', '已完成', '2026-04-15', '李四', '中山路28号', '13777777777');
 COMMIT;
 
 -- ----------------------------
@@ -307,9 +307,9 @@ CREATE TABLE `users` (
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` (`usersid`, `username`, `password`, `realname`, `sex`, `birthday`, `contact`, `regdate`) VALUES ('U20220406165507542', 'zhangsan', '123', '张三', '男', '2000-11-06', '13666666666', '2026-05-25');
-INSERT INTO `users` (`usersid`, `username`, `password`, `realname`, `sex`, `birthday`, `contact`, `regdate`) VALUES ('U20220406182102296', 'lisi', '123', '李四', '男', '2001-11-06', '13777777777', '2026-05-30');
-INSERT INTO `users` (`usersid`, `username`, `password`, `realname`, `sex`, `birthday`, `contact`, `regdate`) VALUES ('U20220816220359245', 'wangwu', '123', '王五', '男', '2001-09-16', '13999999999', '2026-05-31');
+INSERT INTO `users` (`usersid`, `username`, `password`, `realname`, `sex`, `birthday`, `contact`, `regdate`) VALUES ('U20220406165507542', 'zhangsan', '123', '张三', '男', '2000-11-06', '13666666666', '2026-04-12');
+INSERT INTO `users` (`usersid`, `username`, `password`, `realname`, `sex`, `birthday`, `contact`, `regdate`) VALUES ('U20220406182102296', 'lisi', '123', '李四', '男', '2001-11-06', '13777777777', '2026-04-07');
+INSERT INTO `users` (`usersid`, `username`, `password`, `realname`, `sex`, `birthday`, `contact`, `regdate`) VALUES ('U20220816220359245', 'wangwu', '123', '王五', '男', '2001-09-16', '13999999999', '2026-04-21');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
