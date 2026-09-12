@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>网上订餐系统</title>
+    <title>缃戜笂璁㈤绯荤粺</title>
     <link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet" type="text/css" />
     <link href="./themes/index.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="./themes/index.js"></script>
@@ -31,13 +31,13 @@
                 <ul class="top_bav_l">
                 </ul>
                 <div class="header_r">
-                    <font id="ECS_MEMBERZONE" v-if="islogin"> 欢迎光临本站！ <s></s>&nbsp; <span> <a style="color: #FF6766;"
-                        href="login.html">[用户登录]</a> <a style="color: #FF6766;" href="register.html">[用户注册]</a>
+                    <font id="ECS_MEMBERZONE" v-if="islogin"> 娆㈣繋鍏変复鏈珯锛?<s></s>&nbsp; <span> <a style="color: #FF6766;"
+                        href="login.html">[鐢ㄦ埛鐧诲綍]</a> <a style="color: #FF6766;" href="register.html">[鐢ㄦ埛娉ㄥ唽]</a>
                 </span>
                     </font>
-                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 你好 <b>{{ realname }}</b> <span><a
-                        style="color: #FF6766;" href="cart.html">[购物车]</a><a style="color: #FF6766;" href="usercenter.html">[用户中心]</a> <a
-                        style="color: #FF6766;" href="exit.html">[退出系统] </a> </span>
+                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 浣犲ソ <b>{{ realname }}</b> <span><a
+                        style="color: #FF6766;" href="cart.html">[璐墿杞</a><a style="color: #FF6766;" href="usercenter.html">[鐢ㄦ埛涓績]</a> <a
+                        style="color: #FF6766;" href="exit.html">[閫€鍑虹郴缁焆 </a> </span>
                     </font>
                 </div>
             </div>
@@ -60,36 +60,36 @@
         <div class="menu_box clearfix">
             <div class="block">
                 <div class="menu">
-                    <a href="index.html" class="cur" rel="nofollow">网站首页</a>
-                    <a href="article.html" class="cur" rel="nofollow">网站公告</a>
-                    <a href="special.html" class="cur" rel="nofollow">特价食品</a>
-                    <a href="recommend.html" class="cur" rel="nofollow">推荐食品</a>
-                    <a href="all.html" class="cur" rel="nofollow">全部食品</a>
+                    <a href="index.html" class="cur" rel="nofollow">缃戠珯棣栭〉</a>
+                    <a href="article.html" class="cur" rel="nofollow">缃戠珯鍏憡</a>
+                    <a href="special.html" class="cur" rel="nofollow">鐗逛环椋熷搧</a>
+                    <a href="recommend.html" class="cur" rel="nofollow">鎺ㄨ崘椋熷搧</a>
+                    <a href="all.html" class="cur" rel="nofollow">鍏ㄩ儴椋熷搧</a>
                 </div>
             </div>
         </div>
-        <button type="button" class="smart-meal-launcher" @click="openSmartMeal">智能选餐助手</button>
+        <button type="button" class="smart-meal-launcher" @click="openSmartMeal">鏅鸿兘閫夐鍔╂墜</button>
         <div class="smart-meal-mask" v-if="smartMealVisible" @click.self="closeSmartMeal" @keydown.esc="closeSmartMeal">
             <section class="smart-meal-dialog" role="dialog" aria-modal="true" aria-labelledby="smart-meal-title">
-                <h2 id="smart-meal-title" v-text="'你好，' + username + '！今天想吃什么？'"></h2>
-                <p>告诉我口味、预算或忌口，我会从现有餐品中为你挑选。</p>
-                <label for="smart-requirement">用餐需求</label>
-                <textarea id="smart-requirement" ref="smartInput" v-model="smartRequirement" maxlength="500" :disabled="smartLoading" placeholder="例如：预算 30 元，想吃清淡的，不要辣"></textarea>
+                <h2 id="smart-meal-title" v-text="'浣犲ソ锛? + username + '锛佷粖澶╂兂鍚冧粈涔堬紵'"></h2>
+                <p>鍛婅瘔鎴戝彛鍛炽€侀绠楁垨蹇屽彛锛屾垜浼氫粠鐜版湁椁愬搧涓负浣犳寫閫夈€?/p>
+                <label for="smart-requirement">鐢ㄩ闇€姹?/label>
+                <textarea id="smart-requirement" ref="smartInput" v-model="smartRequirement" maxlength="500" :disabled="smartLoading" placeholder="渚嬪锛氶绠?30 鍏冿紝鎯冲悆娓呮贰鐨勶紝涓嶈杈?></textarea>
                 <div class="smart-meal-actions">
-                    <button type="button" @click="closeSmartMeal">关闭</button>
-                    <button type="button" class="smart-meal-primary" @click="getSmartRecommendations" :disabled="smartLoading" v-text="smartLoading ? '正在挑选…' : '开始选餐'"></button>
+                    <button type="button" @click="closeSmartMeal">鍏抽棴</button>
+                    <button type="button" class="smart-meal-primary" @click="getSmartRecommendations" :disabled="smartLoading" v-text="smartLoading ? '姝ｅ湪鎸戦€夆€? : '寮€濮嬮€夐'"></button>
                 </div>
                 <p role="status" aria-live="polite" v-if="smartMessage" v-text="smartMessage"></p>
                 <article class="smart-meal-card" v-for="(item, index) in smartRecommendations" :key="item.foodsid">
                     <img :src="'../upfiles/' + encodeURIComponent(item.image)" :alt="item.foodsname">
                     <div class="smart-meal-details">
-                        <h3 v-text="'方案' + (index + 1) + '：' + item.foodsname"></h3>
-                        <strong v-text="'￥' + item.price"></strong>
+                        <h3 v-text="'鏂规' + (index + 1) + '锛? + item.foodsname"></h3>
+                        <strong v-text="'锟? + item.price"></strong>
                         <p v-text="item.reason"></p>
                     </div>
-                    <button type="button" class="smart-meal-primary" @click="addSmartMealToCart(item)" :disabled="item.adding || item.added" v-text="item.added ? '已加入' : (item.adding ? '正在加入…' : '加入购物车')"></button>
+                    <button type="button" class="smart-meal-primary" @click="addSmartMealToCart(item)" :disabled="item.adding || item.added" v-text="item.added ? '宸插姞鍏? : (item.adding ? '姝ｅ湪鍔犲叆鈥? : '鍔犲叆璐墿杞?)"></button>
                 </article>
-                <a v-if="smartRecommendations.length" href="cart.html">查看购物车</a>
+                <a v-if="smartRecommendations.length" href="cart.html">鏌ョ湅璐墿杞?/a>
             </section>
         </div>
         <div class="blank5"></div>
@@ -108,17 +108,16 @@
             <div class="goodsBox_1">
                 <div class="xm-box" v-for="item in front" :key="item.cateid">
                     <h4 class="title">
-                        <span>{{ item.catename }}</span> <a class="more" :href="'cate.html?id='+item.cateid+''">更多</a>
+                        <span>{{ item.catename }}</span> <a class="more" :href="'cate.html?id='+item.cateid+''">鏇村</a>
                     </h4>
-                    <div id="show_new_area" class="clearfix">
-                        <div class="pic" style='margin-left: 8px;' v-for="x in item.foodsList" :key="x.foodsid">
+                    <div class="smart-food-grid">
+                        <div class="pic" v-for="x in item.foodsList" :key="x.foodsid">
                             <a :href="'detail.html?id='+x.foodsid+''"><img :src="'http://localhost:8080/vue_wsdcxt/upfiles/'+x.image" class="img" /></a>
                             <p class="name">
                                 <a :href="'detail.html?id='+x.foodsid+''" title="">{{x.foodsname}}</a>
                             </p>
                             <p class="price">
-                                价格：
-                                <font class="f1"> ￥{{x.price}}元 </font>
+                                浠锋牸锛?                                <font class="f1"> 锟{x.price}}鍏?</font>
                             </p>
                         </div>
                     </div>
@@ -130,8 +129,8 @@
             <div class="footer">
                 <div class="footer_nav_box">
                     <div class="footer_copyright">
-                        <span> &copy; 网上订餐系统 版权所有，并保留所有权利。<br /> <br />服务时间：09:00-23:00<br /> <br /> <a href="../admin/index.html"
-                            target="_blank">管理员入口</a>
+                        <span> &copy; 缃戜笂璁㈤绯荤粺 鐗堟潈鎵€鏈夛紝骞朵繚鐣欐墍鏈夋潈鍒┿€?br /> <br />鏈嶅姟鏃堕棿锛?9:00-23:00<br /> <br /> <a href="../admin/index.html"
+                            target="_blank">绠＄悊鍛樺叆鍙?/a>
                         </span>
                     </div>
                 </div>
