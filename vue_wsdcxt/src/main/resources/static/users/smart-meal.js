@@ -6,6 +6,13 @@ const vue = new Vue({
         smartMessage: '', smartGroups: [], smartBudget: null, smartSelection: {}, smartSubmittedRequirement: ''
     },
     computed: {
+        searchSuggestions: function() {
+            const keyword = this.key.trim().toLowerCase();
+            if (!keyword) return [];
+            const allFoods = this.front.reduce((foods, category) => foods.concat(category.foodsList || []), []);
+            const characters = keyword.replace(/\s/g, '').split('');
+            return allFoods.filter(item => item.foodsname && characters.some(character => item.foodsname.toLowerCase().indexOf(character) >= 0)).slice(0, 6);
+        },
         smartTotalCents: function() {
             return Object.values(this.smartSelection).reduce((total, item) => total + Math.round(Number(item.price) * 100), 0);
         },
@@ -15,6 +22,10 @@ const vue = new Vue({
         }
     },
     methods: {
+        chooseSuggestion: function(name) {
+            this.key = name;
+            this.query();
+        },
         loadPage: function() {
             this.userid = sessionStorage.getItem('userid');
             this.islogin = !this.userid;

@@ -693,14 +693,23 @@ public class IndexController extends BaseController {
 	@RequestMapping(value = "queryFoods.action")
 	public Map<String, Object> queryFoods(@RequestParam(defaultValue = "1") Integer page,
 			@RequestParam(defaultValue = "12") Integer limit, String name) {
-		System.out.println("name  ==>  " + name);
 		Map<String, Object> map = new HashMap<String, Object>();
-		Foods foods = new Foods();
-		foods.setFoodsname(name);
-		Page<Foods> pager = com.github.pagehelper.PageHelper.startPage(page, limit);// 定义当前页和分页条数
-		List<Foods> foodsList = this.foodsService.getFoodsByCond(foods);
+		String keyword = name == null ? "" : name.trim().toLowerCase();
+		List<Foods> allFoods = this.foodsService.getAllFoods();
+		List<Foods> matchedFoods = new ArrayList<Foods>();
+		for (Foods foods : allFoods) {
+			String foodsName = foods.getFoodsname() == null ? "" : foods.getFoodsname().toLowerCase();
+			boolean matched = keyword.isEmpty();
+			for (int i = 0; i < keyword.length() && !matched; i++) {
+				matched = foodsName.indexOf(keyword.charAt(i)) >= 0;
+			}
+			if (matched) matchedFoods.add(foods);
+		}
+		int fromIndex = Math.min((page - 1) * limit, matchedFoods.size());
+		int toIndex = Math.min(fromIndex + limit, matchedFoods.size());
+		List<Foods> foodsList = matchedFoods.subList(fromIndex, toIndex);
 		// 返回的map中定义数据格式
-		map.put("count", pager.getTotal());
+		map.put("count", matchedFoods.size());
 		map.put("total", foodsList.size());
 		map.put("data", foodsList);
 		map.put("code", 0);
