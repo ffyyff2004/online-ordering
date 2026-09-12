@@ -72,24 +72,34 @@
         <div class="smart-meal-mask" v-if="smartMealVisible" @click.self="closeSmartMeal" @keydown.esc="closeSmartMeal">
             <section class="smart-meal-dialog" role="dialog" aria-modal="true" aria-labelledby="smart-meal-title">
                 <h2 id="smart-meal-title" v-text="'你好，' + username + '！今天想吃什么？'"></h2>
-                <p>告诉我口味、预算或忌口，我会从现有餐品中为你挑选。</p>
+                <p>想要一荤一素、两荤一素或一菜一汤？每类最多挑选 3 个候选，由你自由加购。</p>
                 <label for="smart-requirement">用餐需求</label>
-                <textarea id="smart-requirement" ref="smartInput" v-model="smartRequirement" maxlength="500" :disabled="smartLoading" placeholder="例如：预算 30 元，想吃清淡的，不要辣"></textarea>
+                <textarea id="smart-requirement" ref="smartInput" v-model="smartRequirement" maxlength="500" :disabled="smartLoading || smartAdding" placeholder="例如：预算 30 元，想吃清淡的，不要辣"></textarea>
                 <div class="smart-meal-actions">
                     <button type="button" @click="closeSmartMeal">关闭</button>
-                    <button type="button" class="smart-meal-primary" @click="getSmartRecommendations" :disabled="smartLoading" v-text="smartLoading ? '正在挑选…' : '开始选餐'"></button>
+                    <button type="button" class="smart-meal-primary" @click="getSmartRecommendations(false)" :disabled="smartLoading || smartAdding" v-text="smartLoading ? '正在挑选…' : '开始选餐'"></button>
                 </div>
+                <button type="button" v-if="smartSubmittedRequirement" :disabled="smartLoading || smartAdding" @click="getSmartRecommendations(true)">按原需求换一批</button>
                 <p role="status" aria-live="polite" v-if="smartMessage" v-text="smartMessage"></p>
-                <article class="smart-meal-card" v-for="(item, index) in smartRecommendations" :key="item.foodsid">
-                    <img :src="'../upfiles/' + encodeURIComponent(item.image)" :alt="item.foodsname">
-                    <div class="smart-meal-details">
-                        <h3 v-text="'方案' + (index + 1) + '：' + item.foodsname"></h3>
-                        <strong v-text="'￥' + item.price"></strong>
-                        <p v-text="item.reason"></p>
-                    </div>
-                    <button type="button" class="smart-meal-primary" @click="addSmartMealToCart(item)" :disabled="item.adding || item.added" v-text="item.added ? '已加入' : (item.adding ? '正在加入…' : '加入购物车')"></button>
-                </article>
-                <a v-if="smartRecommendations.length" href="cart.html">查看购物车</a>
+                <div class="smart-meal-summary" v-if="smartGroups.length">
+                    <strong v-text="smartSummary"></strong>
+                    <p>每组是可选菜品，不是必须全部购买。按建议数量搭配，也可以自行增减。预算仅统计本轮加购，不含购物车原有餐品。</p>
+                </div>
+                <section class="smart-meal-group" v-for="group in smartGroups" :key="group.type">
+                    <h3 class="smart-meal-group-title" v-text="group.label + ' · ' + group.items.length + ' 个候选'"></h3>
+                    <p v-text="'建议选择 ' + group.count + ' 道，已加入 ' + selectedCount(group.type) + ' 道'"></p>
+                    <article class="smart-meal-card" v-for="item in group.items" :key="item.foodsid">
+                        <img :src="'../upfiles/' + encodeURIComponent(item.image)" :alt="item.foodsname">
+                        <div class="smart-meal-details">
+                            <h3 v-text="item.foodsname"></h3>
+                            <strong v-text="'￥' + Number(item.price).toFixed(2)"></strong>
+                            <p v-text="item.reason"></p>
+                        </div>
+                        <button type="button" class="smart-meal-primary" @click="addSmartMealToCart(item, group)" :disabled="smartLoading || smartAdding || hasAdded(item) || exceedsBudget(item)" v-text="addLabel(item)"></button>
+                    </article>
+                </section>
+                <p v-if="smartGroups.length">分类和口味依据现有名称、介绍判断，配料信息不全；严格忌口请向商家确认。</p>
+                <a v-if="smartGroups.length" href="cart.html">查看购物车</a>
             </section>
         </div>
         <div class="blank5"></div>

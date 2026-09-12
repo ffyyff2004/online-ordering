@@ -20,3 +20,7 @@
 @media (max-width: 900px) { .smart-food-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 680px) { .smart-food-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 420px) { .smart-food-grid { grid-template-columns: 1fr; } }
+
+.smart-meal-group { margin-top: 20px; padding: 14px; background: #fffaf7; border-radius: 8px; }
+.smart-meal-group-title { font-size: 19px; color: #a53820; }
+.smart-meal-summary { padding: 12px; background: #f2f7f4; border-radius: 8px; margin-top: 12px; }

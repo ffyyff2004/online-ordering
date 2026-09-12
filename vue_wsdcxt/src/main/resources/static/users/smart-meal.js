@@ -1,18 +1,18 @@
 const vue = new Vue({
     el: '#app',
     data: {
-        islogin: true,
-        userid: '',
-        realname: '',
-        username: '用户',
-        cate: [],
-        front: [],
-        key: '',
-        smartMealVisible: false,
-        smartRequirement: '',
-        smartLoading: false,
-        smartMessage: '',
-        smartRecommendations: []
+        islogin: true, userid: '', realname: '', username: '用户', cate: [], front: [], key: '',
+        smartMealVisible: false, smartRequirement: '', smartLoading: false, smartAdding: false,
+        smartMessage: '', smartGroups: [], smartBudget: null, smartSelection: {}, smartSubmittedRequirement: ''
+    },
+    computed: {
+        smartTotalCents: function() {
+            return Object.values(this.smartSelection).reduce((total, item) => total + Math.round(Number(item.price) * 100), 0);
+        },
+        smartSummary: function() {
+            return '本轮已加入：￥' + (this.smartTotalCents / 100).toFixed(2) +
+                (this.smartBudget === null ? '' : ' / 预算 ￥' + Number(this.smartBudget).toFixed(2));
+        }
     },
     methods: {
         loadPage: function() {
@@ -20,12 +20,8 @@ const vue = new Vue({
             this.islogin = !this.userid;
             this.realname = sessionStorage.getItem('realname') || '';
             this.username = sessionStorage.getItem('username') || this.realname || '用户';
-            axios.get('../index/front.action').then(result => {
-                this.cate = result.data.cateList || [];
-            }).catch(() => {});
-            axios.get('../index/index.action').then(result => {
-                this.front = result.data.frontList || [];
-            }).catch(() => {});
+            axios.get('../index/front.action').then(result => { this.cate = result.data.cateList || []; }).catch(() => {});
+            axios.get('../index/index.action').then(result => { this.front = result.data.frontList || []; }).catch(() => {});
         },
         openSmartMeal: function() {
             this.smartMealVisible = true;
@@ -35,56 +31,58 @@ const vue = new Vue({
             this.smartMealVisible = false;
             this.$nextTick(() => document.querySelector('.smart-meal-launcher').focus());
         },
-        getSmartRecommendations: function() {
-            if (this.smartLoading) return;
-            this.smartRecommendations = [];
-            if (!this.smartRequirement.trim()) {
-                this.smartMessage = '请先输入你的用餐需求。';
-                return;
-            }
-            if (!this.userid) {
-                this.smartMessage = '请先登录后使用智能选餐助手。';
-                return;
-            }
+        getSmartRecommendations: function(shuffle) {
+            if (this.smartLoading || this.smartAdding) return;
+            const requirement = shuffle ? this.smartSubmittedRequirement : this.smartRequirement.trim();
+            if (!requirement) { this.smartMessage = '请先输入你的用餐需求。'; return; }
+            if (!this.userid) { this.smartMessage = '请先登录后使用智能选餐助手。'; return; }
+            this.smartGroups = [];
             this.smartLoading = true;
-            this.smartMessage = '正在根据你的需求挑选餐品，请稍候。';
-            axios.post('../smart-meal/recommend.action', {
-                username: this.username,
-                requirement: this.smartRequirement.trim()
-            }, {timeout: 45000}).then(result => {
-                if (result.data.success && Array.isArray(result.data.recommendations)) {
-                    this.smartRecommendations = result.data.recommendations.map(item => Object.assign({}, item, {added: false, adding: false}));
-                    this.smartMessage = '已为你挑选好餐品，请选择喜欢的方案。';
+            this.smartMessage = '正在读取菜单，按你的需求分组挑选…';
+            axios.post('../smart-meal/recommend.action', {requirement: requirement}, {timeout: 65000}).then(result => {
+                if (result.data.success && Array.isArray(result.data.groups)) {
+                    if (!shuffle) this.smartSelection = {};
+                    this.smartBudget = result.data.budget == null ? null : Number(result.data.budget);
+                    this.smartGroups = result.data.groups;
+                    this.smartSubmittedRequirement = requirement;
+                    this.smartMessage = result.data.message;
                 } else {
-                    this.smartMessage = result.data.message || '暂时没有合适的方案，请调整需求后重试。';
+                    this.smartMessage = result.data.message || '暂时没有合适的候选，请调整需求后重试。';
                 }
             }).catch(() => {
-                this.smartMessage = '智能选餐暂时不可用，请稍后重试。';
+                this.smartMessage = '选餐请求失败或超时，请稍后重试。';
             }).finally(() => { this.smartLoading = false; });
         },
-        addSmartMealToCart: function(item) {
-            if (item.adding || item.added) return;
-            if (!this.userid) {
-                this.smartMessage = '请先登录后加入购物车。';
-                return;
-            }
-            item.adding = true;
+        hasAdded: function(item) { return Boolean(this.smartSelection[item.foodsid]); },
+        exceedsBudget: function(item) {
+            return this.smartBudget !== null && this.smartTotalCents + Math.round(Number(item.price) * 100) > Math.round(this.smartBudget * 100);
+        },
+        selectedCount: function(type) {
+            return Object.values(this.smartSelection).filter(item => item.type === type).length;
+        },
+        addLabel: function(item) {
+            if (this.hasAdded(item)) return '已加入';
+            if (this.exceedsBudget(item)) return '超出本轮预算';
+            return '加入购物车';
+        },
+        addSmartMealToCart: function(item, group) {
+            if (this.smartAdding || this.smartLoading || this.hasAdded(item) || this.exceedsBudget(item)) return;
+            if (!this.userid) { this.smartMessage = '请先登录后加入购物车。'; return; }
+            this.smartAdding = true;
             axios.post('../index/addcart.action', {
                 userid: this.userid, foodsid: item.foodsid, price: item.price, num: '1'
             }, {timeout: 15000}).then(result => {
                 if (result.data.success) {
-                    item.added = true;
-                    this.smartMessage = '已将“' + item.foodsname + '”加入购物车。';
+                    this.$set(this.smartSelection, item.foodsid, {price: item.price, type: group.type});
+                    this.smartMessage = '已将“' + item.foodsname + '”加入购物车，可继续选择其他菜品。';
                 } else {
                     this.smartMessage = '加入购物车失败，请稍后重试。';
                 }
             }).catch(() => {
-                this.smartMessage = '加入购物车失败，请检查网络后重试。';
-            }).finally(() => { item.adding = false; });
+                this.smartMessage = '未收到加购确认，请先到购物车检查，避免重复添加。';
+            }).finally(() => { this.smartAdding = false; });
         },
-        query: function() {
-            window.location.href = 'query.html?id=' + encodeURIComponent(this.key);
-        }
+        query: function() { window.location.href = 'query.html?id=' + encodeURIComponent(this.key); }
     },
     created: function() { this.loadPage(); }
 });
