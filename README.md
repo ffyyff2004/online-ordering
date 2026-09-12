@@ -1,49 +1,35 @@
-﻿# 在线点餐系统
+# 閸︺劎鍤庨悙褰掝樀缁崵绮?
+鏉╂瑦妲告稉鈧稉顏勭唨娴?Spring Boot閵嗕府yBatis閵嗕府ySQL 閸?Vue.js 閻ㄥ嫬婀痪璺ㄥ仯妞佹劗閮寸紒鐕傜礉閸栧懎鎯堥悽銊﹀煕缁旑垰鎷扮粻锛勬倞缁旑垬鈧?
+## 妞ゅ湱娲扮紒鎾寸€?
+- `vue_wsdcxt/`閿涙瓔pring Boot 閸氬海顏崣濠傚缁旑垶娼ら幀渚€銆夐棃?- `vue_wsdcxt.sql`閿涙碍鏆熼幑顔肩氨鐞涖劎绮ㄩ弸鍕嫲缁€杞扮伐閺佺増宓?
+## 閺堫剙婀存潻鎰攽
 
-这是一个基于 Spring Boot、MyBatis、MySQL 和 Vue.js 的在线点餐系统，包含用户端和管理端。
-
-## 项目结构
-
-- `vue_wsdcxt/`：Spring Boot 后端及前端静态页面
-- `vue_wsdcxt.sql`：数据库表结构和示例数据
-
-## 本地运行
-
-1. 创建 MySQL 数据库 `vue_wsdcxt`。
-2. 执行根目录下的 `vue_wsdcxt.sql`。
-3. 设置数据库环境变量（也可以使用默认值）：
-
+1. 閸掓稑缂?MySQL 閺佺増宓佹惔?`vue_wsdcxt`閵?2. 閹笛嗩攽閺嶅湱娲拌ぐ鏇氱瑓閻?`vue_wsdcxt.sql`閵?3. 鐠佸墽鐤嗛弫鐗堝祦鎼存挾骞嗘晶鍐ㄥ綁闁插骏绱欐稊鐔峰讲娴犮儰濞囬悽銊╃帛鐠併倕鈧》绱氶敍?
 ```powershell
 $env:DB_USERNAME = "root"
-$env:DB_PASSWORD = "你的MySQL密码"
+$env:DB_PASSWORD = "娴ｇ姷娈慚ySQL鐎靛棛鐖?
 ```
 
-4. 在 `vue_wsdcxt` 目录执行：
-
+4. 閸?`vue_wsdcxt` 閻╊喖缍嶉幍褑顢戦敍?
 ```powershell
 mvn spring-boot:run
 ```
 
-5. 浏览器访问：
+5. 濞村繗顫嶉崳銊問闂傤噯绱?
+- 閻劍鍩涚粩顖ょ窗`http://localhost:8080/vue_wsdcxt/users/index.html`
+- 缁狅紕鎮婄粩顖ょ窗`http://localhost:8080/vue_wsdcxt/admin/index.html`
 
-- 用户端：`http://localhost:8080/vue_wsdcxt/users/index.html`
-- 管理端：`http://localhost:8080/vue_wsdcxt/admin/index.html`
+## 鐠囧瓨妲?
+- `target/` 缁涘鐎铏规晸閹存劖鏋冩禒鏈电瑝娴兼碍褰佹禍銈呭煂 GitHub閵?- 閺佺増宓佹惔鎾圭箾閹恒儱鐦戦惍渚€鈧俺绻冮悳顖氼暔閸欐﹢鍣洪柊宥囩枂閿涘奔绗夐崷銊ゅ敩閻椒鑵戞穱婵嗙摠閻喎鐤勭€靛棛鐖滈妴?- SQL 閺傚洣娆㈡稉顓犳畱鐠愶箑褰挎禒鍛暏娴滃孩婀伴崷鐗堢川缁€鐚寸礉闁劎璁查弮鎯邦嚞閸欏﹥妞傛穱顔芥暭閵?
 
-## 说明
-
-- `target/` 等构建生成文件不会提交到 GitHub。
-- 数据库连接密码通过环境变量配置，不在代码中保存真实密码。
-- SQL 文件中的账号仅用于本地演示，部署时请及时修改。
-
-## 智能选餐助手
-
-首页右下角的“智能选餐助手”会读取数据库中的当前餐品，将用户的口味、预算和忌口发送给大模型，并且只返回数据库中存在的 3 个餐品方案。用户可以直接把方案加入购物车。
-
-启动后配置大模型 API Key：
-
+## 閺呴缚鍏橀柅澶愵樀閸斺晜澧?
+妫ｆ牠銆夐崣鍏呯瑓鐟欐帞娈戦垾婊勬閼充粙鈧顦甸崝鈺傚閳ユ繀绱扮拠璇插絿閺佺増宓佹惔鎾茶厬閻ㄥ嫬缍嬮崜宥夘樀閸濅緤绱濈亸鍡欐暏閹撮娈戦崣锝呮嚄閵嗕線顣╃粻妤€鎷拌箛灞藉經閸欐垿鈧胶绮版径褎膩閸ㄥ绱濋獮鏈电瑬閸欘亣绻戦崶鐐存殶閹诡喖绨辨稉顓炵摠閸︺劎娈?3 娑擃亪顦甸崫浣规煙濡楀牄鈧倻鏁ら幋宄板讲娴犮儳娲块幒銉﹀Ω閺傝顢嶉崝鐘插弳鐠愵厾澧挎潪锔衡偓?
+閸氼垰濮╅崥搴ㄥ帳缂冾喖銇囧Ο鈥崇€?API Key閿?
 ```powershell
-$env:AI_API_KEY = "你的API Key"
-$env:AI_MODEL = "gpt-4o-mini"
+$env:AI_API_KEY = "娴ｇ姷娈慉PI Key"
+$env:AI_BASE_URL = "https://coding.rockyy.top"
+$env:AI_API_KEY = "娴ｇ姷娈?API Key"
+$env:AI_MODEL = "claude-sonnet-5"
 ```
 
-也可以通过 `AI_BASE_URL` 配置兼容 OpenAI 接口格式的模型服务地址。
+娑旂喎褰叉禒銉┾偓姘崇箖 `AI_BASE_URL` 闁板秶鐤嗛崗鐓庮啇 OpenAI 閹恒儱褰涢弽鐓庣础閻ㄥ嫭膩閸ㄥ婀囬崝鈥虫勾閸р偓閵?
