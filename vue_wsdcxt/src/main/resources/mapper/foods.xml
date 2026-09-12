@@ -58,7 +58,7 @@
 	<select id="getFoodsByCate" parameterType="String" resultMap="foodsMap">
 		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid
 		and
-		a.cateid=#{cateid} order by hits desc limit 5
+		a.cateid=#{cateid} order by hits desc
 	</select>
 
 	<!-- 食品表 按主键(foodsid)查询SQL语句 FoodsDAO通过ID(getFoodsById)调用此配置 -->
