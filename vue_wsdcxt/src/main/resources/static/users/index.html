@@ -1,25 +1,20 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh">
 
 <head>
     <meta charset="utf-8">
-    <title>网上订餐系统</title>
+    <title>缃戜笂璁㈤绯荤粺</title>
     <link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet" type="text/css" />
     <link href="./themes/index.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="./themes/index.js"></script>
     <script type="text/javascript" src="./themes/swiper.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="./themes/swiper.min.css" />
-    <style>
-        .swiper-container{
-            width: 1200px;
-            height: 300px;
-            margin: 0px auto;
-        }
-        .swiper-slide img{
-            width: 100%;
-            height: 100%;
-        }
+    <link rel="stylesheet" type="text/css" href="./themes/swiper.min.css" />    <style>
+        .smart-meal-launcher{position:fixed;right:28px;bottom:28px;z-index:1000;border:0;border-radius:28px;padding:14px 22px;background:#ff6766;color:#fff;font-size:16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+        .smart-meal-mask{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding-top:80px}
+        .smart-meal-dialog{width:680px;max-width:calc(100% - 32px);background:#fff;border-radius:10px;padding:24px;box-sizing:border-box;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+        .smart-meal-dialog h2{margin:0 0 8px;color:#333}.smart-meal-dialog p{color:#777}.smart-meal-input{width:100%;height:86px;padding:10px;box-sizing:border-box;border:1px solid #ddd;border-radius:6px;resize:vertical}.smart-meal-actions{margin-top:12px;text-align:right}.smart-meal-actions button{border:0;border-radius:4px;padding:9px 16px;margin-left:8px;cursor:pointer}.smart-meal-submit{background:#ff6766;color:#fff}.smart-meal-close{background:#eee}.smart-meal-card{display:flex;gap:14px;padding:12px 0;border-top:1px solid #eee;align-items:center}.smart-meal-card img{width:76px;height:76px;object-fit:cover}.smart-meal-card h3{margin:0 0 6px}.smart-meal-card p{margin:4px 0}.smart-meal-card button{background:#ff6766;color:#fff;border:0;border-radius:4px;padding:7px 12px;cursor:pointer}
     </style>
+
 </head>
 
 <body>
@@ -29,13 +24,13 @@
                 <ul class="top_bav_l">
                 </ul>
                 <div class="header_r">
-                    <font id="ECS_MEMBERZONE" v-if="islogin"> 欢迎光临本站！ <s></s>&nbsp; <span> <a style="color: #FF6766;"
-                        href="login.html">[用户登录]</a> <a style="color: #FF6766;" href="register.html">[用户注册]</a>
+                    <font id="ECS_MEMBERZONE" v-if="islogin"> 娆㈣繋鍏変复鏈珯锛?<s></s>&nbsp; <span> <a style="color: #FF6766;"
+                        href="login.html">[鐢ㄦ埛鐧诲綍]</a> <a style="color: #FF6766;" href="register.html">[鐢ㄦ埛娉ㄥ唽]</a>
                 </span>
                     </font>
-                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 你好 <b>{{ realname }}</b> <span><a
-                        style="color: #FF6766;" href="cart.html">[购物车]</a><a style="color: #FF6766;" href="usercenter.html">[用户中心]</a> <a
-                        style="color: #FF6766;" href="exit.html">[退出系统] </a> </span>
+                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 浣犲ソ <b>{{ realname }}</b> <span><a
+                        style="color: #FF6766;" href="cart.html">[璐墿杞</a><a style="color: #FF6766;" href="usercenter.html">[鐢ㄦ埛涓績]</a> <a
+                        style="color: #FF6766;" href="exit.html">[閫€鍑虹郴缁焆 </a> </span>
                     </font>
                 </div>
             </div>
@@ -58,15 +53,32 @@
         <div class="menu_box clearfix">
             <div class="block">
                 <div class="menu">
-                    <a href="index.html" class="cur" rel="nofollow">网站首页</a>
-                    <a href="article.html" class="cur" rel="nofollow">网站公告</a>
-                    <a href="special.html" class="cur" rel="nofollow">特价食品</a>
-                    <a href="recommend.html" class="cur" rel="nofollow">推荐食品</a>
-                    <a href="all.html" class="cur" rel="nofollow">全部食品</a>
+                    <a href="index.html" class="cur" rel="nofollow">缃戠珯棣栭〉</a>
+                    <a href="article.html" class="cur" rel="nofollow">缃戠珯鍏憡</a>
+                    <a href="special.html" class="cur" rel="nofollow">鐗逛环椋熷搧</a>
+                    <a href="recommend.html" class="cur" rel="nofollow">鎺ㄨ崘椋熷搧</a>
+                    <a href="all.html" class="cur" rel="nofollow">鍏ㄩ儴椋熷搧</a>
                 </div>
             </div>
         </div>
-        <div class="blank5"></div>
+                <button class="smart-meal-launcher" @click="openSmartMeal">智能选餐助手</button>
+        <div class="smart-meal-mask" v-if="smartMealVisible">
+            <div class="smart-meal-dialog">
+                <h2>你好，{{ displayName }}！今天想吃什么？</h2>
+                <p>可以告诉我口味、预算、忌口或用餐场景，我只会从当前可售餐品中为你推荐。</p>
+                <textarea class="smart-meal-input" v-model="smartRequirement" placeholder="例如：想吃清淡的，预算 30 元，不要辣"></textarea>
+                <div class="smart-meal-actions">
+                    <button class="smart-meal-close" @click="smartMealVisible=false">关闭</button>
+                    <button class="smart-meal-submit" @click="getSmartRecommendations" :disabled="smartLoading">{{ smartLoading ? '正在挑选...' : '开始选餐' }}</button>
+                </div>
+                <p v-if="smartMessage">{{ smartMessage }}</p>
+                <div class="smart-meal-card" v-for="item in smartRecommendations" :key="item.foodsid">
+                    <img :src="'http://localhost:8080/vue_wsdcxt/upfiles/'+item.image" :alt="item.foodsname">
+                    <div style="flex:1"><h3>{{ item.foodsname }} <span style="color:#ff6766">￥{{ item.price }}</span></h3><p>{{ item.reason }}</p></div>
+                    <button @click="addSmartMealToCart(item)">{{ item.added ? '已加入' : '加入购物车' }}</button>
+                </div>
+            </div>
+        </div><div class="blank5"></div>
         <div class="block clearfix">
             <div class="swiper-container">
                 <div class="swiper-wrapper">
@@ -82,7 +94,7 @@
             <div class="goodsBox_1">
                 <div class="xm-box" v-for="item in front" :key="item.cateid">
                     <h4 class="title">
-                        <span>{{ item.catename }}</span> <a class="more" :href="'cate.html?id='+item.cateid+''">更多</a>
+                        <span>{{ item.catename }}</span> <a class="more" :href="'cate.html?id='+item.cateid+''">鏇村</a>
                     </h4>
                     <div id="show_new_area" class="clearfix">
                         <div class="pic" style='margin-left: 8px;' v-for="x in item.foodsList" :key="x.foodsid">
@@ -91,8 +103,8 @@
                                 <a :href="'detail.html?id='+x.foodsid+''" title="">{{x.foodsname}}</a>
                             </p>
                             <p class="price">
-                                价格：
-                                <font class="f1"> ￥{{x.price}}元 </font>
+                                浠锋牸锛?
+                                <font class="f1"> 锟{x.price}}鍏?</font>
                             </p>
                         </div>
                     </div>
@@ -104,8 +116,8 @@
             <div class="footer">
                 <div class="footer_nav_box">
                     <div class="footer_copyright">
-                        <span> &copy; 网上订餐系统 版权所有，并保留所有权利。<br /> <br />服务时间：09:00-23:00<br /> <br /> <a href="../admin/index.html"
-                            target="_blank">管理员入口</a>
+                        <span> &copy; 缃戜笂璁㈤绯荤粺 鐗堟潈鎵€鏈夛紝骞朵繚鐣欐墍鏈夋潈鍒┿€?br /> <br />鏈嶅姟鏃堕棿锛?9:00-23:00<br /> <br /> <a href="../admin/index.html"
+                            target="_blank">绠＄悊鍛樺叆鍙?/a>
                         </span>
                     </div>
                 </div>
@@ -117,14 +129,20 @@
 <script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
 <script type="text/javascript" src="../admin/asset/js/vue.js"></script>
 <script type="text/javascript">
-    const vue = new Vue({ // 实例化Vue对象
-        el: '#app', // 绑定作用域
-        data: { //定义数据 用于vue的双向绑定
+    const vue = new Vue({ // 瀹炰緥鍖朧ue瀵硅薄
+        el: '#app', // 缁戝畾浣滅敤鍩?
+        data: { //瀹氫箟鏁版嵁 鐢ㄤ簬vue鐨勫弻鍚戠粦瀹?
             islogin: '',
             userid: '',
             realname: '',
-            cate: {}, // 用来保存食品类型对象数据
-            front: {}, // 用来保存前端显示数据
+            username: '',
+            smartMealVisible: false,
+            smartRequirement: '',
+            smartLoading: false,
+            smartMessage: '',
+            smartRecommendations: [],
+            cate: {}, // 鐢ㄦ潵淇濆瓨椋熷搧绫诲瀷瀵硅薄鏁版嵁
+            front: {}, // 鐢ㄦ潵淇濆瓨鍓嶇鏄剧ず鏁版嵁
             key: '',
         },
         methods: {
@@ -139,16 +157,38 @@
                 _this.userid = sessionStorage.getItem('userid');
                 _this.islogin = sessionStorage.getItem('userid') == null;
                 _this.realname = sessionStorage.getItem('realname');
+                _this.username = sessionStorage.getItem('username') || _this.realname || '用户';
             },
-            query: function() {
+                        openSmartMeal: function() {
+                this.smartMealVisible = true;
+                this.smartMessage = '';
+                this.smartRecommendations = [];
+            },
+            getSmartRecommendations: function() {
+                if (!this.smartRequirement.trim()) { this.smartMessage = '请先输入你的用餐需求。'; return; }
+                if (!this.userid) { this.smartMessage = '请先登录后使用智能选餐助手。'; return; }
+                this.smartLoading = true;
+                this.smartMessage = '';
+                axios.post('http://localhost:8080/vue_wsdcxt/smart-meal/recommend.action', {username: this.username, requirement: this.smartRequirement}).then(result => {
+                    if (result.data.success) { this.smartRecommendations = result.data.recommendations; }
+                    else { this.smartMessage = result.data.message; }
+                }).catch(() => { this.smartMessage = '智能选餐暂时不可用，请检查后端和 API 配置。'; }).finally(() => { this.smartLoading = false; });
+            },
+            addSmartMealToCart: function(item) {
+                axios.post('http://localhost:8080/vue_wsdcxt/index/addcart.action', {userid: this.userid, foodsid: item.foodsid, price: item.price, num: '1'}).then(result => {
+                    if (result.data.success) { this.$set(item, 'added', true); } else { this.smartMessage = '加入购物车失败，请稍后重试。'; }
+                });
+            },`n            query: function() {
                 let url = "query.html?id=" + this.key;
                 window.location.href = url;
             },
         },
-        created() { // 生命周期相关的函数
+        created() { // 鐢熷懡鍛ㄦ湡鐩稿叧鐨勫嚱鏁?
             this.loadPage();
         },
     })
 </script>
 
 </html>
+
+
