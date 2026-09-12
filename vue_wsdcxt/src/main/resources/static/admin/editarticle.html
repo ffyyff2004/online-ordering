@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>编辑新闻公告信息</title>
+  <link rel="stylesheet" type="text/css" href="./asset/css/pintuer.css" />
+  <link rel="stylesheet" type="text/css" href="./asset/css/admin.css" />
+</head>
+
+<body>
+  <div class="panel admin-panel" id="app">
+    <div class="body-content">
+      <div class="form-x">
+        <div class="form-group">
+          <div class="label">
+            <label>标题：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="title" v-model="title" placeholder="请输入标题" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>图片：</label>
+          </div>
+          <div class="field">
+            <form id="head-img" enctype="multipart/form-data">
+              <input type="file" name="image" id="image" placeholder="图片" />
+              <button type="button" class="button bg-blue margin-left icon-upload" id="btnUpload"  @click.prevent="upload()"> 文件上传 </button>
+            </form>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>内容：</label>
+          </div>
+          <div class="field">
+            <textarea class="input" id="contents" v-model="contents" style="height: 220px;" placeholder="请输入内容" ></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label></label>
+          </div>
+          <div class="field">
+            <button class="button bg-main icon-check" type="button" @click.prevent="update()"> 提交保存</button>
+            <button class="button bg-gray icon-recycle" type="button" @click.prevent="reset()"> 取消重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="./asset/js/jquery.js"></script>
+  <script type="text/javascript" src="./asset/js/pintuer.js"></script>
+  <script type="text/javascript" src="./asset/layui/layui.js"></script>
+  <script type="text/javascript" src="./asset/js/axios.min.js"></script>
+  <script type="text/javascript" src="./asset/js/vue.js"></script>
+  <script type="text/javascript">
+		const vue = new Vue({
+			el: '#app',// 绑定作用域
+			data: { //定义数据用于vue的双向绑定
+				articleid: '',
+				title: '', // 标题
+				url: '', // 图片
+				contents: '', // 内容
+			},
+			methods: {
+				getUrlParam: function () {
+					var name, value;
+					var str = location.href; // 取得整个地址栏
+					var num = str.indexOf("?"); // 定位参数起始位置
+					str = str.substr(num + 1); // 取得所有参数 
+					var arr = str.split("&"); // 各个参数放到数组里
+					for (var i = 0; i < arr.length; i++) {
+						num = arr[i].indexOf("=");
+						if (num > 0) {
+							name = arr[i].substring(0, num);
+							value = arr[i].substr(num + 1);
+							this.articleid = value; // 确认主键参数
+						}
+					}
+				},
+				loadPage: function () {
+					let _this = this;
+					axios.get('http://localhost:8080/vue_wsdcxt/article/getArticleById.action?id=' + _this.articleid).then(result => {
+						_this.title= result.data.title;
+						_this.url= result.data.image;
+						_this.contents= result.data.contents;
+					});
+				},
+				reset: function () {
+					this.loadPage();
+				},
+				upload: function () {
+					let _this = this;
+					var formData = new FormData($('#head-img')[0]);
+					axios.post('http://localhost:8080/vue_wsdcxt/ajaxupload/upload.action', formData).then(result => {
+						_this.url = result.data.url;
+						alert('上传成功');
+					});
+				},
+				update: function () {
+					let _this = this;
+					var data = {
+						articleid: _this.articleid,
+						title: _this.title,
+						image: _this.url,
+						contents: _this.contents,
+					};
+					axios.post('http://localhost:8080/vue_wsdcxt/article/updateArticle.action', data).then(result => {
+						if (result.data.code > 0) {
+							var index = parent.layer.getFrameIndex(window.name);
+							parent.location.reload();
+							parent.layer.close(index);
+						} else {
+							alert('修改失败');
+						}
+					});
+				},
+			},
+
+			created() { // 生命周期相关的函数
+				this.getUrlParam();
+				this.loadPage();
+				let _this = this;
+			},
+		})
+	</script>
+
+</body>
+
+</html>
+
+

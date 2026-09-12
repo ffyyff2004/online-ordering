@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>网上订餐系统</title>
+    <link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="top_nav">
+            <div class="block">
+                <ul class="top_bav_l">
+                </ul>
+                <div class="header_r">
+                    <font id="ECS_MEMBERZONE" v-if="islogin"> 欢迎光临本站！ <s></s>&nbsp; <span> <a style="color: #FF6766;"
+                        href="login.html">[用户登录]</a> <a style="color: #FF6766;" href="register.html">[用户注册]</a>
+                </span>
+                    </font>
+                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 你好 <b>{{ realname }}</b> <span><a
+                        style="color: #FF6766;" href="cart.html">[购物车]</a><a style="color: #FF6766;" href="usercenter.html">[用户中心]</a> <a
+                        style="color: #FF6766;" href="exit.html">[退出系统] </a> </span>
+                    </font>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="block header">
+                <div class="top">
+                    <a href="index.html" class="logo"><img src="themes/ecmoban_dangdang/images/logo.gif" /></a>
+                    <div class="top_search">
+                        <input name="keywords" type="text" class="keyword" v-model="key" />
+                        <input value="" id="seachbtn" type="button" @click="query">
+                    </div>
+                    <div class="head_r">
+                        <div class="top_shopCart clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="clear: both"></div>
+        <div class="menu_box clearfix">
+            <div class="block">
+                <div class="menu">
+                    <a href="index.html" class="cur" rel="nofollow">网站首页</a>
+                    <a href="article.html" class="cur" rel="nofollow">网站公告</a>
+                    <a href="special.html" class="cur" rel="nofollow">特价食品</a>
+                    <a href="recommend.html" class="cur" rel="nofollow">推荐食品</a>
+                    <a href="all.html" class="cur" rel="nofollow">全部食品</a>
+                </div>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div class="block box">
+            <div class="blank"></div>
+            <div id="ur_here">
+                当前位置: <a href="index.html">首页</a>
+                <code> &gt; </code> 用户注册
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div class="block">
+            <div class="box">
+                <div class="box_1">
+                    <h3>
+                        <span>用户注册</span>
+                    </h3>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                        <tr valign="top">
+                            <td bgcolor="#FFFFFF" align="center">
+                                <div class="blank5"></div>
+                                <table width="60%" border="0" cellpadding="5" cellspacing="1" bgcolor="#dddddd">
+                                    <tr>
+                                        <td width="28%" align="right" bgcolor="#FFFFFF">用户名：</td>
+                                        <td width="76%" align="left" bgcolor="#FFFFFF"><input type="text" v-model="username" size="25" class="inputBg" id="username" placeholder="请输入用户名" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="28%" align="right" bgcolor="#FFFFFF">密码：</td>
+                                        <td width="76%" align="left" bgcolor="#FFFFFF"><input v-model="password" type="password" size="25" class="inputBg" id="password" placeholder="请输入密码" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="28%" align="right" bgcolor="#FFFFFF">姓名：</td>
+                                        <td width="76%" align="left" bgcolor="#FFFFFF"><input v-model="realname" type="text" size="25" class="inputBg" id="realname" placeholder="请输入姓名" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="28%" align="right" bgcolor="#FFFFFF">性别：</td>
+                                        <td width="76%" align="left" bgcolor="#FFFFFF"><input type="radio" v-model="sex" name="sex" value="男" title="男" id="sex" />男&nbsp;&nbsp;&nbsp;<input type="radio" v-model="sex" name="sex" value="女" title="女" id="sex" />女</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="28%" align="right" bgcolor="#FFFFFF">出生日期：</td>
+                                        <td width="76%" align="left" bgcolor="#FFFFFF"><input v-model="birthday" type="text" size="25" class="inputBg" id="birthday" @click="datePicker('birthday')" readonly="readonly" placeholder="请输入出生日期" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="28%" align="right" bgcolor="#FFFFFF">联系方式：</td>
+                                        <td width="76%" align="left" bgcolor="#FFFFFF"><input v-model="contact" type="text" size="25" class="inputBg" id="contact" placeholder="请输入联系方式" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" align="center" bgcolor="#FFFFFF"><input type="button" class="bnt_blue_1" style="border: none;" value="确认注册" @click="toRegister()" /></td>
+                                    </tr>
+                                </table>
+                                <div class="blank5"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="blank5"></div>
+        </div>
+        <div id="footer">
+            <div class="footer">
+                <div class="footer_nav_box">
+                    <div class="footer_copyright">
+                        <span> &copy; 网上订餐系统 版权所有，并保留所有权利。<br /> <br />服务时间：09:00-23:00<br /> <br /> <a href="../admin/index.html"
+                            target="_blank">管理员入口</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
+<script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script type="text/javascript" src="../admin/asset/js/vue.js"></script>
+<script type="text/javascript">
+    const vue = new Vue({ // 实例化Vue对象
+        el: '#app', // 绑定作用域
+        data: { //定义数据 用于vue的双向绑定
+            username: '', // 用户名
+            password: '', // 密码
+            realname: '', // 定义姓名数据
+            sex: '男', // 定义性别数据
+            birthday: '', // 定义出生日期数据
+            contact: '', // 定义联系方式数据
+            islogin: '',
+            userid: '',
+            realname: '',
+            key: '',
+        },
+        methods: {
+            datePicker: function(elementId) {
+                let vueObj = this;
+                WdatePicker({
+                    el: elementId,
+                    dateFmt: 'yyyy-MM-dd', //日期格式，可以只显示年或年月，也可以额外显示时间
+                    onpicked: function() {
+                        var value = $("#" + elementId).val();
+                        vueObj.birthday = value;
+                    },
+                    oncleared: function() {
+                        vueObj.birthday = null;
+                    },
+                    isShowClear: true,
+                    readOnly: true
+                });
+            },
+            loadPage: function() {
+                let _this = this;
+                _this.userid = sessionStorage.getItem('userid');
+                _this.islogin = sessionStorage.getItem('userid') == null;
+                _this.realname = sessionStorage.getItem('realname');
+            },
+            toRegister: function() {
+                let _this = this;
+                var data = {
+                    username: _this.username,
+                    password: _this.password,
+                    realname: _this.realname,
+                    sex: _this.sex,
+                    birthday: $('#birthday').val(),
+                    contact: _this.contact,
+                };
+                axios.post('http://localhost:8080/vue_wsdcxt/index/register.action', data).then(result => {
+                    if (result.data.code > 0) {
+                        alert('注册成功');
+                        window.location.href = 'login.html';
+                    } else {
+                        console.log('保存失败,请稍后再试');
+                    }
+                });
+            },
+            query: function() {
+                let url = "query.html?id=" + this.key;
+                window.location.href = url;
+            },
+        },
+        created() { // 生命周期相关的函数
+            this.loadPage();
+        },
+    })
+</script>
+
+</html>

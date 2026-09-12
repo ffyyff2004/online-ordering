@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>回复意见反馈信息</title>
+    <link rel="stylesheet" type="text/css" href="./asset/css/pintuer.css" />
+    <link rel="stylesheet" type="text/css" href="./asset/css/admin.css" />
+</head>
+
+<body>
+    <div class="panel admin-panel" id="app">
+        <div class="body-content">
+            <div class="form-x">
+                <div class="form-group">
+                    <div class="label">
+                        <label>内容：</label>
+                    </div>
+                    <div class="field">
+                        <input type="text" class="input" style="width:420px;" id="contents" v-model="contents" placeholder="请输入内容" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="label">
+                        <label>管理回复：</label>
+                    </div>
+                    <div class="field">
+                        <input type="text" class="input" style="width:420px;" id="reps" v-model="reps" placeholder="请输入管理回复" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="label">
+                        <label></label>
+                    </div>
+                    <div class="field">
+                        <button class="button bg-main icon-check" type="button" @click.prevent="update()"> 提交保存</button>
+                        <button class="button bg-gray icon-recycle" type="button" @click.prevent="reset()"> 取消重置</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="./asset/js/jquery.js"></script>
+    <script type="text/javascript" src="./asset/js/pintuer.js"></script>
+    <script type="text/javascript" src="./asset/layui/layui.js"></script>
+    <script type="text/javascript" src="./asset/js/axios.min.js"></script>
+    <script type="text/javascript" src="./asset/js/vue.js"></script>
+    <script type="text/javascript">
+        const vue = new Vue({
+            el: '#app', // 绑定作用域
+            data: { //定义数据用于vue的双向绑定
+                complainsid: '',
+                contents: '', // 内容
+                reps: '', // 管理回复
+            },
+            methods: {
+                getUrlParam: function() {
+                    var name, value;
+                    var str = location.href; // 取得整个地址栏
+                    var num = str.indexOf("?"); // 定位参数起始位置
+                    str = str.substr(num + 1); // 取得所有参数 
+                    var arr = str.split("&"); // 各个参数放到数组里
+                    for (var i = 0; i < arr.length; i++) {
+                        num = arr[i].indexOf("=");
+                        if (num > 0) {
+                            name = arr[i].substring(0, num);
+                            value = arr[i].substr(num + 1);
+                            this.complainsid = value; // 确认主键参数
+                        }
+                    }
+                },
+                loadPage: function() {
+                    let _this = this;
+                    axios.get('http://localhost:8080/vue_wsdcxt/complains/getComplainsById.action?id=' + _this.complainsid).then(result => {
+                        _this.contents = result.data.contents;
+                        _this.reps = result.data.reps;
+                    });
+                },
+                reset: function() {
+                    this.loadPage();
+                },
+                update: function() {
+                    let _this = this;
+                    var data = {
+                        complainsid: _this.complainsid,
+                        contents: _this.contents,
+                        reps: _this.reps,
+                    };
+                    axios.post('http://localhost:8080/vue_wsdcxt/complains/updateComplains.action', data).then(result => {
+                        if (result.data.code > 0) {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.location.reload();
+                            parent.layer.close(index);
+                        } else {
+                            alert('修改失败');
+                        }
+                    });
+                },
+            },
+
+            created() { // 生命周期相关的函数
+                this.getUrlParam();
+                this.loadPage();
+                let _this = this;
+            },
+        })
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>添加管理员信息</title>
+  <link rel="stylesheet" type="text/css" href="./asset/css/pintuer.css" />
+  <link rel="stylesheet" type="text/css" href="./asset/css/admin.css" />
+</head>
+
+<body>
+  <div class="panel admin-panel" id="app">
+    <div class="body-content">
+      <div class="form-x">
+        <div class="form-group">
+          <div class="label">
+            <label>用户名：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="username" v-model="username" placeholder="请输入用户名" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>密码：</label>
+          </div>
+          <div class="field">
+            <input type="password" class="input" style="width:420px;" id="password" v-model="password" placeholder="请输入密码" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>姓名：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="realname" v-model="realname" placeholder="请输入姓名" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>联系方式：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="contact" v-model="contact" placeholder="请输入联系方式" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label></label>
+          </div>
+          <div class="field">
+            <button class="button bg-main icon-check" type="button" @click.prevent="save()"> 提交保存</button>
+            <button class="button bg-gray icon-recycle" type="button" @click.prevent="reset()"> 取消重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="./asset/js/jquery.js"></script>
+  <script type="text/javascript" src="./asset/js/pintuer.js"></script>
+  <script type="text/javascript" src="./asset/layui/layui.js"></script>
+  <script type="text/javascript" src="./asset/js/axios.min.js"></script>
+  <script type="text/javascript" src="./asset/js/vue.js"></script>
+	<script type="text/javascript">
+		const vue = new Vue({ // 实例化Vue对象
+			el: '#app',// 绑定作用域
+			data: { //定义数据
+				username: '', // 定义用户名数据
+				password: '', // 定义密码数据
+				realname: '', // 定义姓名数据
+				contact: '', // 定义联系方式数据
+			},
+			methods: {
+				save: function () {
+					let _this = this;
+					var data = {
+						username: _this.username,
+						password: _this.password,
+						realname: _this.realname,
+						contact: _this.contact,
+					};
+					axios.post('http://localhost:8080/vue_wsdcxt/admin/insertAdmin.action', data).then(result => {
+						if (result.data.code > 0) {
+							if (window.confirm('保存成功,是否继续添加？')) {
+								_this.reset();
+							} else {
+								var index = parent.layer.getFrameIndex(window.name);
+								parent.location.reload();
+								parent.layer.close(index);
+							}
+						} else {
+							console.log('保存失败,请稍后再试');
+						}
+					});
+				},
+				reset: function () {
+					this.pageLoad();
+				},
+				pageLoad: function () { // 页面加载
+					this.username= '';
+					this.password= '';
+					this.realname= '';
+					this.contact= '';
+				},
+				validate: function () { // 验证输入非空
+				},
+			},
+			created() { // 生命周期相关的函数
+				let _this = this;
+				_this.pageLoad();
+			},
+		})
+	</script>
+
+</body>
+
+</html>
+
+

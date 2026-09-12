@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>管理员信息列表</title>
+  <link rel="stylesheet" href="./asset/css/pintuer.css" />
+  <link rel="stylesheet" href="./asset/css/admin.css" />
+  <link rel="stylesheet" href="./asset/layui/css/layui.css" />
+</head>
+
+  <div class="panel admin-panel" id="app">
+    <div class="panel-head"><strong class="icon-reorder"> 管理员信息列表</strong></div>
+    <div class="padding border-bottom">
+      <ul class="search" style="padding-left:10px;">
+        <li> <input type="text" name="keywords" class="input" id="keywords" v-model="keywords" placeholder="请输入用户名" style="width:250px; line-height:17px;display:inline-block" /> <a class="button border-blue icon-search" title="查询" @click="query()"> 查询</a> </li>
+        <li> <a class="button border-red icon-trash-o" title="批量删除" @click="datadel()"> 批量删除</a> </li>
+        <li> <a class="button border-main icon-plus-square-o" href="javascript:;"
+            onclick="openForm('添加管理员','addadmin.html')" title="添加管理员"> 添加管理员</a> </li>
+        <li> <a class="button border-green icon-recycle" href="javascript:;" title="刷新数据" onclick="location.reload()">
+            刷新数据</a> </li>
+      </ul>
+    </div>
+    <table class="table table-hover text-center">
+      <thead>
+        <tr>
+          <th style="text-align: center" width="50">&nbsp;</th>
+          <th style="text-align: center">用户名</th>
+          <th style="text-align: center">姓名</th>
+          <th style="text-align: center">联系方式</th>
+          <th style="text-align: center">创建日期</th>
+          <th style="text-align: center" width="250">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in admin" :key="item.adminid">
+          <td style="text-align: center"><input type="checkbox" :value="item.adminid" placeholder="请选择" v-model="ids"></td>
+          <td style="text-align: center">{{ item.username }}</td>
+          <td style="text-align: center">{{ item.realname }}</td>
+          <td style="text-align: center">{{ item.contact }}</td>
+          <td style="text-align: center">{{ item.addtime }}</td>
+          <td style="text-align: center">&nbsp;&nbsp;<a class="button border-main button-small" href="javascript:;" @click="getAdminById(item.adminid)"><span class="icon-edit"></span>
+          	修改</a> <a class="button border-red button-small" href="javascript:;"
+          	@click="deleteAdmin(item.adminid)"><span class="icon-trash-o"></span> 删除</a></td>
+        </tr>
+        <tr>
+          <td colspan="7">
+            <!-- 存放分页的容器 -->
+            <div id="layui" class="r"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="text/javascript" src="./asset/js/jquery.js"></script>
+  <script type="text/javascript" src="./asset/js/pintuer.js"></script>
+  <script type="text/javascript" src="./asset/layui/layui.js"></script>
+  <script type="text/javascript" src="./asset/js/tool.js"></script>
+  <script type="text/javascript" src="./asset/js/axios.min.js"></script>
+  <script type="text/javascript" src="./asset/js/vue.js"></script>
+	<script type="text/javascript">
+		const vue = new Vue({ // 实例化Vue对象
+			el: '#app',// 绑定作用域
+			data: { //定义数据
+				admin: [],
+				ids: [],// 定义批量删除的数组
+				page: {},
+				count: 0,
+				page: 1,
+				limit: 10,
+				keywords: '', //查询关键字
+			},
+			created() { // 生命周期相关的函数
+				this.loadTable(); // 调用查询管理员信息的方法
+			},
+			methods: {
+				loadTable: function () { // 查询管理员信息的函数
+					let _this = this;
+					axios.get('http://localhost:8080/vue_wsdcxt/admin/getAdminByPage.action?page=' + _this.page + '&limit=' + _this.limit).then(result => {
+						_this.admin = result.data.data;
+						_this.count = result.data.count;
+						if (_this.page == 1) {
+							_this.loadPage();
+						}
+					});
+				},
+				loadPage: function () { // 调用LayUI分页标签的使用
+					layui.use(['laypage'], function () {
+						const laypage = layui.laypage;
+						laypage.render({
+							elem: 'layui', // 定义标签显示
+							count: vue.count, //数据量
+							limit: vue.limit,//每页限制
+							jump: function (obj, first) {
+								if (!first) {
+									vue.page = obj.curr;
+									vue.loadTable();
+								}
+							}
+						});
+					})
+				},
+				deleteAdmin: function (adminid) { // 根据主键删除管理员信息
+					let _this = this;
+					if (window.confirm('确定要删除这条记录吗？')) {
+						axios.get('http://localhost:8080/vue_wsdcxt/admin/deleteAdmin.action?id=' + adminid).then(result => {
+							if (result.data.code > 0) {
+								_this.loadTable();
+							} else {
+								alert('系统错误，请稍后再试');
+							}
+						});
+					}
+				},
+				datadel: function () { // 批量删除管理员信息
+					let _this = this;
+					if (window.confirm('确定要批量删除记录吗？')) {
+						axios.post('http://localhost:8080/vue_wsdcxt/admin/deleteAdminByIds.action', _this.ids).then(result => {
+							if (result.data.code > 0) {
+								_this.loadTable();
+							} else {
+								alert('系统错误，请稍后再试');
+							}
+						});
+					}
+				},
+				query: function() {
+					let _this = this;
+					axios.get('http://localhost:8080/vue_wsdcxt/admin/getAdmin.action?page=' + _this.page + '&limit=' + _this.limit + '&keywords=' + _this.keywords).then(result => {
+						_this.admin = result.data.data;
+						_this.count = result.data.count;
+						if (_this.page == 1) {
+							_this.loadPage();
+						}
+					});
+				},
+				getAdminById: function (adminid) { // 编辑按钮点击事件
+					let url = 'editadmin.html?id=' + adminid;
+					layer_show('编辑管理员', url, 1000, 500);
+				},
+			},
+		});
+	</script>
+
+</body>
+
+</html>
+
+

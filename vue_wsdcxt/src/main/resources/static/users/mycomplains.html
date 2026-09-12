@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>网上订餐系统</title>
+    <link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="top_nav">
+            <div class="block">
+                <div class="bookmail">
+                    <div id="append_parent"></div>
+                </div>
+                <div class="user_control">
+                    <font id="ECS_MEMBERZONE" v-if="islogin"> 欢迎光临本店，<a href="login.html">[用户登录]</a>&nbsp;<a href="register.html">[用户注册]</a>
+                    </font>
+                    <font id="ECS_MEMBERZONE" v-if="!islogin">欢迎光临本店{{ realname }}， <a href="cart.html">[购物车]</a>&nbsp; <a href="usercenter.html">[用户中心]</a>&nbsp;
+                        <a href="exit.html">[退出系统]</a>
+                    </font>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="block header">
+                <div class="top clearfix">
+                    <a href="index.html" class="logo"><img src="themes/ecmoban_dangdang/images/logo.gif"> </a>
+                    <div class="head_r">
+                        <div class="top_search">
+                            <div class="headSearch_input">
+                                <input name="keywords" type="text" class="keyword" v-model="key" />
+                                <input value="" id="seachbtn" type="button" @click="query">
+                            </div>
+                            <div style="clear: both"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both"></div>
+
+        <div class="menu_box clearfix">
+            <div class="block main_menu">
+                <div class="menu">
+                    <a href="index.html" class="cur">网站首页<span></span></a>
+                    <a href="article.html" class="cur">网站公告<span></span></a>
+                    <a href="recommend.html" class="cur">推荐食品<span></span></a>
+                    <a href="special.html" class="cur">特价食品<span></span></a>
+                    <a href="all.html" class="cur">全部食品<span></span></a>
+                </div>
+            </div>
+        </div>
+        <div class="block box">
+            <div class="blank"></div>
+            <div id="ur_here">
+                当前位置: <a href="index.html">首页</a>
+                <code> &gt; </code> 用户中心<code> &gt; </code> 我的意见反馈
+            </div>
+        </div>
+        <div class="blank"></div>
+
+        <div class="blank"></div>
+        <div class="block clearfix">
+            <div class="AreaL">
+                <div class="box">
+                    <div class="box_1">
+                        <div class="userCenterBox">
+                            <div class="userMenu">
+                                <a href="usercenter.html"><img src="themes/ecmoban_dangdang/images/u2.gif" />用户中心</a>
+                                <a href="userinfo.html"><img src="themes/ecmoban_dangdang/images/u2.gif" alt="" />用户信息</a>
+                                <a href="editpwd.html"><img src="themes/ecmoban_dangdang/images/u3.gif" alt="" />修改密码</a>
+                                <a href="orderslist.html"><img src="themes/ecmoban_dangdang/images/u3.gif" alt="" />我的订单</a>
+                                <a href="myfav.html"><img src="themes/ecmoban_dangdang/images/u3.gif" alt="" />我的收藏</a>
+                                <a href="addcomplains.html"><img src="themes/ecmoban_dangdang/images/u3.gif" alt="" />意见反馈</a>
+                                <a href="mycomplains.html"><img src="themes/ecmoban_dangdang/images/u3.gif" alt="" />我的意见反馈</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="AreaR">
+                <div class="box">
+                    <div class="box_1">
+                        <div class="userCenterBox boxCenterList clearfix" style="_height: 1%;">
+                            <h5>
+                                <span>我的意见反馈</span>
+                            </h5>
+                            <div class="blank"></div>
+                            <table width="100%" border="0" cellpadding="5" cellspacing="1" bgcolor="#dddddd">
+                                <tr>
+                                    <td align="center" bgcolor="#ffffff">标题</td>
+                                    <td align="center" bgcolor="#ffffff">内容</td>
+                                    <td align="center" bgcolor="#ffffff">日期</td>
+                                    <td align="center" bgcolor="#ffffff">状态</td>
+                                    <td align="center" bgcolor="#ffffff">管理员回复</td>
+                                </tr>
+                                <tr align="center" bgcolor="#ffffff" v-for="item in complainsList" :key="item.complainsid">
+                                    <td style="text-align: center">{{ item.title }}</td>
+                                    <td style="text-align: center">{{ item.contents }}</td>
+                                    <td style="text-align: center">{{ item.addtime }}</td>
+                                    <td style="text-align: center">{{ item.status }}</td>
+                                    <td style="text-align: center">{{ item.reps }}</td>
+                                </tr>
+                            </table>
+                            <div class="blank5"></div>
+                            <!-- 存放分页的容器 -->
+                            <div id="layui" style="text-align: center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div id="footer">
+            <div class="footer">
+                <div class="footer_nav_box">
+                    <div class="footer_copyright">
+                        <span> &copy; 网上订餐系统 版权所有，并保留所有权利。<br /> <br />服务时间：09:00-23:00<br /> <br /> <a href="../admin/index.html"
+                            target="_blank">管理员入口</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
+<script type="text/javascript" src="../admin/asset/layui/layui.js"></script>
+<script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script type="text/javascript" src="../admin/asset/js/vue.js"></script>
+<script type="text/javascript">
+    const vue = new Vue({ // 实例化Vue对象
+        el: '#app', // 绑定作用域
+        data: { //定义数据 用于vue的双向绑定
+            islogin: '',
+            userid: '',
+            realname: '', // 定义姓名数据
+            complainsList: {},
+            page: {},
+            count: 0,
+            page: 1,
+            limit: 10,
+            key: '',
+        },
+        methods: {
+            loadTable: function() { // 查询订单信息的函数
+                let _this = this;
+                axios.get('http://127.0.0.1:8080/vue_wsdcxt/index/myComplains.action?page=' + _this.page + '&limit=' + _this.limit + '&userid=' + _this.userid).then(result => {
+                    _this.complainsList = result.data.data;
+                    _this.count = result.data.count;
+                    if (_this.page == 1) {
+                        _this.loadPage();
+                    }
+                });
+            },
+            loadPage: function() { // 调用LayUI分页标签的使用
+                let _this = this;
+                layui.use(['laypage'], function() {
+                    const laypage = layui.laypage;
+                    laypage.render({
+                        elem: 'layui', // 定义标签显示
+                        count: vue.count, //数据量
+                        limit: vue.limit, //每页限制
+                        jump: function(obj, first) {
+                            if (!first) {
+                                vue.page = obj.curr;
+                                vue.loadTable();
+                            }
+                        }
+                    });
+                })
+            },
+            query: function() {
+                let url = "query.html?id=" + this.key;
+                window.location.href = url;
+            },
+        },
+        created() { // 生命周期相关的函数
+            if (sessionStorage.getItem('userid') == null) {
+                window.location.href = "login.html";
+            }
+            this.userid = sessionStorage.getItem('userid');
+            this.islogin = sessionStorage.getItem('userid') == null;
+            this.realname = sessionStorage.getItem('realname');
+            this.loadTable();
+        },
+    })
+</script>
+
+</html>

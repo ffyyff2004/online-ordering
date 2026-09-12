@@ -1,0 +1,19 @@
+﻿# Java / Maven
+**/target/
+*.class
+*.war
+*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Local configuration and secrets
+**/application-local.properties
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db

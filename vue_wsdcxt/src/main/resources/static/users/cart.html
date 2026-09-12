@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>网上订餐系统</title>
+    <link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="top_nav">
+            <div class="block">
+                <ul class="top_bav_l">
+                </ul>
+                <div class="header_r">
+                    <font id="ECS_MEMBERZONE" v-if="islogin"> 欢迎光临本站！ <s></s>&nbsp; <span> <a style="color: #FF6766;"
+                        href="login.html">[用户登录]</a> <a style="color: #FF6766;" href="register.html">[用户注册]</a>
+                </span>
+                    </font>
+                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 你好 <b>{{ realname }}</b> <span><a
+                        style="color: #FF6766;" href="cart.html">[购物车]</a><a style="color: #FF6766;" href="usercenter.html">[用户中心]</a> <a
+                        style="color: #FF6766;" href="exit.html">[退出系统] </a> </span>
+                    </font>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="block header">
+                <div class="top">
+                    <a href="index.html" class="logo"><img src="themes/ecmoban_dangdang/images/logo.gif" /></a>
+                    <div class="top_search">
+                        <input name="keywords" type="text" class="keyword" v-model="key" />
+                        <input value="" id="seachbtn" type="button" @click="query">
+                    </div>
+                    <div class="head_r">
+                        <div class="top_shopCart clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="clear: both"></div>
+        <div class="menu_box clearfix">
+            <div class="block">
+                <div class="menu">
+                    <a href="index.html" class="cur" rel="nofollow">网站首页</a>
+                    <a href="article.html" class="cur" rel="nofollow">网站公告</a>
+                    <a href="special.html" class="cur" rel="nofollow">特价食品</a>
+                    <a href="recommend.html" class="cur" rel="nofollow">推荐食品</a>
+                    <a href="all.html" class="cur" rel="nofollow">全部食品</a>
+                </div>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div class="block table">
+            <div class="flowBox">
+                <h6>
+                    <span>购物车</span>
+                </h6>
+                <table width="99%" align="center" border="0" cellpadding="5" cellspacing="1" bgcolor="#dddddd">
+                    <tr>
+                        <th bgcolor="#ffffff">食品名称</th>
+                        <th bgcolor="#ffffff">价格</th>
+                        <th bgcolor="#ffffff">数量</th>
+                        <th bgcolor="#ffffff">日期</th>
+                        <th bgcolor="#ffffff">操作</th>
+                    </tr>
+                    <tr v-for="item in cartList" :key="item.cartid">
+                        <td bgcolor="#ffffff" align="center" style="width: 300px;">
+                            <a :href="'detail.html?id='+item.foodsid+''" target="_blank"> <img style="width: 80px; height: 80px;" :src="'http://localhost:8080/vue_wsdcxt/upfiles/'+item.foods.image" border="0" title="" />
+                            </a> <br /> <a :href="'detail.html?id='+item.foodsid+''" target="_blank" class="f6">{{item.foodsname}}</a></td>
+                        <td align="center" bgcolor="#ffffff">￥{{item.price}}元</td>
+                        <td align="center" bgcolor="#ffffff">{{item.num}}</td>
+                        <td align="center" bgcolor="#ffffff">{{item.addtime}}</td>
+                        <td align="center" bgcolor="#ffffff"><a href="javascript:;" class="f6" @click="deleteCart(item.cartid)">移除</a></td>
+                    </tr>
+                </table>
+
+
+                <table width="99% " align="center " border="0 " cellpadding="5 " cellspacing="0 " bgcolor="#dddddd ">
+                    <tr>
+                        <td bgcolor="#ffffff ">
+                            <a href="index.html"><img src="themes/ecmoban_dangdang/images/continue.gif " alt="continue " /> </a>
+                        </td>
+                        <td bgcolor="#ffffff " align="right ">
+                            <a href="javascript:;" @click="checkout()"><img src="themes/ecmoban_dangdang/images/checkout.gif " alt="checkout " /> </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="blank "></div>
+
+            <div class="blank5 "></div>
+        </div>
+        <div id="footer">
+            <div class="footer">
+                <div class="footer_nav_box">
+                    <div class="footer_copyright">
+                        <span> &copy; 网上订餐系统 版权所有，并保留所有权利。<br /> <br />服务时间：09:00-23:00<br /> <br /> <a href="../admin/index.html"
+                            target="_blank">管理员入口</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
+<script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script type="text/javascript" src="../admin/asset/js/vue.js"></script>
+<script type="text/javascript ">
+    const vue = new Vue({ // 实例化Vue对象
+        el: '#app', // 绑定作用域
+        data: { //定义数据 用于vue的双向绑定
+            islogin: '',
+            userid: '',
+            username: '', // 用户名
+            realname: '', // 定义姓名数据
+            cartList: {},
+            num: 0,
+            key: '',
+        },
+        methods: {
+            loadPage: function() {
+                let _this = this;
+                _this.userid = sessionStorage.getItem('userid');
+                _this.islogin = sessionStorage.getItem('userid') == null;
+                _this.realname = sessionStorage.getItem('realname');
+                axios.get('http://localhost:8080/vue_wsdcxt/index/cart.action?userid=' + _this.userid).then(result => {
+                    _this.cartList = result.data.cartList;
+                    _this.num = result.data.num;
+                });
+            },
+            deleteCart: function(cartid) { // 根据主键删除管理员信息
+                let _this = this;
+                if (window.confirm('确定要删除这条记录吗？')) {
+                    axios.get('http://localhost:8080/vue_wsdcxt/index/deletecart.action?id=' + cartid).then(result => {
+                        if (result.data.code > 0) {
+                            _this.loadPage();
+                        } else {
+                            alert('系统错误，请稍后再试');
+                        }
+                    });
+                }
+            },
+            checkout: function() {
+                if (this.num != 0) {
+                    window.location.href = "checkout.html";
+                } else {
+                    alert('请选购食品');
+                }
+            },
+            query: function() {
+                let url = "query.html?id=" + this.key;
+                window.location.href = url;
+            },
+        },
+        created() { // 生命周期相关的函数
+            this.loadPage();
+        },
+    })
+</script>
+
+</html>

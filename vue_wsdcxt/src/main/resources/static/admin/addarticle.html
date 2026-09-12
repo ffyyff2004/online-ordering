@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>添加新闻公告信息</title>
+  <link rel="stylesheet" type="text/css" href="./asset/css/pintuer.css" />
+  <link rel="stylesheet" type="text/css" href="./asset/css/admin.css" />
+</head>
+
+<body>
+  <div class="panel admin-panel" id="app">
+    <div class="body-content">
+      <div class="form-x">
+        <div class="form-group">
+          <div class="label">
+            <label>标题：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="title" v-model="title" placeholder="请输入标题" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>图片：</label>
+          </div>
+          <div class="field">
+            <form id="head-img" enctype="multipart/form-data">
+              <input type="file" name="image" id="image" placeholder="图片" />
+              <button type="button" class="button bg-blue margin-left icon-upload" id="btnUpload" @click.prevent="upload()"> 文件上传 </button>
+            </form>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>内容：</label>
+          </div>
+          <div class="field">
+            <textarea class="input" id="contents" v-model="contents" style="height: 220px;" placeholder="请输入内容" ></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label></label>
+          </div>
+          <div class="field">
+            <button class="button bg-main icon-check" type="button" @click.prevent="save()"> 提交保存</button>
+            <button class="button bg-gray icon-recycle" type="button" @click.prevent="reset()"> 取消重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="./asset/js/jquery.js"></script>
+  <script type="text/javascript" src="./asset/js/pintuer.js"></script>
+  <script type="text/javascript" src="./asset/layui/layui.js"></script>
+  <script type="text/javascript" src="./asset/js/axios.min.js"></script>
+  <script type="text/javascript" src="./asset/js/vue.js"></script>
+	<script type="text/javascript">
+		const vue = new Vue({ // 实例化Vue对象
+			el: '#app',// 绑定作用域
+			data: { //定义数据
+				title: '', // 定义标题数据
+				url: '',
+				contents: '', // 定义内容数据
+			},
+			methods: {
+				upload: function () {
+					let _this = this;
+					var formData = new FormData($('#head-img')[0]);
+					axios.post('http://localhost:8080/vue_wsdcxt/ajaxupload/upload.action', formData).then(result => {
+						_this.url = result.data.url;
+						alert('上传成功');
+					});
+				},
+				save: function () {
+					let _this = this;
+					var data = {
+						title: _this.title,
+						image: _this.url,
+						contents: _this.contents,
+					};
+					axios.post('http://localhost:8080/vue_wsdcxt/article/insertArticle.action', data).then(result => {
+						if (result.data.code > 0) {
+							if (window.confirm('保存成功,是否继续添加？')) {
+								_this.reset();
+							} else {
+								var index = parent.layer.getFrameIndex(window.name);
+								parent.location.reload();
+								parent.layer.close(index);
+							}
+						} else {
+							console.log('保存失败,请稍后再试');
+						}
+					});
+				},
+				reset: function () {
+					this.pageLoad();
+				},
+				pageLoad: function () { // 页面加载
+					this.title= '';
+					this.url= '';
+					this.contents= '';
+				},
+				validate: function () { // 验证输入非空
+				},
+			},
+			created() { // 生命周期相关的函数
+				let _this = this;
+				_this.pageLoad();
+			},
+		})
+	</script>
+
+</body>
+
+</html>
+
+

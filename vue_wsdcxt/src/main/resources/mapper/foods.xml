@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 配置关于食品表的 MyBatis映射文件 -->
+<!-- namespace：必须与对应的接口全类名一致 id:必须与对应接口的某个对应的方法名一致 -->
+<mapper namespace="com.boot.dao.FoodsDAO">
+	<resultMap type="com.boot.entity.Foods" id="foodsMap">
+		<id property="foodsid" column="foodsid" />
+		<result property="foodsname" column="foodsname" />
+		<result property="image" column="image" />
+		<result property="cateid" column="cateid" />
+		<result property="price" column="price" />
+		<result property="recommend" column="recommend" />
+		<result property="special" column="special" />
+		<result property="addtime" column="addtime" />
+		<result property="hits" column="hits" />
+		<result property="sellnum" column="sellnum" />
+		<result property="contents" column="contents" />
+		<result property="catename" column="catename" />
+		<!-- 通过外键关联查询 返回封装Cate对象 -->
+		<association property="cate" column="cateid" select="com.boot.dao.CateDAO.getCateById" javaType="com.boot.entity.Cate" />
+	</resultMap>
+
+	<!-- 食品表 插入SQL语句 FoodsDAO通过ID(insertFoods)调用此配置 -->
+	<insert id="insertFoods" parameterType="foods">
+		insert into foods(foodsid , foodsname , image , cateid , price , recommend , special , addtime , hits , sellnum ,
+		contents ) values(#{foodsid} , #{foodsname} ,
+		#{image} , #{cateid} , #{price} , #{recommend} , #{special} , #{addtime} , #{hits} , #{sellnum} , #{contents} )
+	</insert>
+
+	<!-- 食品表 更新SQL语句 FoodsDAO通过ID(updateFoods)调用此配置 -->
+	<update id="updateFoods" parameterType="foods">
+		update foods set foodsname=#{foodsname} , image=#{image} , cateid=#{cateid} , price=#{price} ,
+		recommend=#{recommend} , special=#{special} , addtime=#{addtime} , hits=#{hits} , sellnum=#{sellnum} , contents=#{contents} where foodsid=#{foodsid}
+	</update>
+
+	<!-- 食品表 按主键删除SQL语句 FoodsDAO通过ID(deleteFoods)调用此配置 -->
+	<delete id="deleteFoods" parameterType="String">
+		delete from foods where foodsid = #{foodsid}
+	</delete>
+
+	<!-- 食品表 查询全部食品信息SQL语句 FoodsDAO通过ID(getAllFoods)调用此配置 -->
+	<select id="getAllFoods" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid order by foodsid desc
+	</select>
+
+	<!-- 根据食品编号倒序查询显示最新上架 -->
+	<select id="getFoodsByNews" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid order by foodsid desc limit 5
+	</select>
+
+	<!-- 根据食品点击数倒序查询热门食品 -->
+	<select id="getFoodsByHot" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid order by foodsid desc limit 5
+	</select>
+
+	<!-- 根据食品类型查询N个食品信息 首页显示 -->
+	<select id="getFoodsByCate" parameterType="String" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid
+		and
+		a.cateid=#{cateid} order by hits desc limit 5
+	</select>
+
+	<!-- 食品表 按主键(foodsid)查询SQL语句 FoodsDAO通过ID(getFoodsById)调用此配置 -->
+	<select id="getFoodsById" parameterType="String" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid and
+		foodsid=#{foodsid}
+	</select>
+
+	<!-- 食品表 按条件精确查询SQL语句 FoodsDAO通过ID(getFoodsByCond)调用此配置 -->
+	<select id="getFoodsByCond" parameterType="foods" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid
+		<if test="foodsname != null and '' != foodsname">
+			and a.foodsname = #{foodsname}
+		</if>
+		<if test="image != null and '' != image">
+			and a.image = #{image}
+		</if>
+		<if test="cateid != null and '' != cateid">
+			and a.cateid = #{cateid}
+		</if>
+		<if test="price != null and '' != price">
+			and a.price = #{price}
+		</if>
+		<if test="recommend != null and '' != recommend">
+			and a.recommend = #{recommend}
+		</if>
+		<if test="special != null and '' != special">
+			and a.special = #{special}
+		</if>
+		<if test="addtime != null and '' != addtime">
+			and a.addtime = #{addtime}
+		</if>
+		<if test="hits != null and '' != hits">
+			and a.hits = #{hits}
+		</if>
+		<if test="sellnum != null and '' != sellnum">
+			and a.sellnum = #{sellnum}
+		</if>
+		<if test="contents != null and '' != contents">
+			and a.contents = #{contents}
+		</if>
+	</select>
+
+	<!-- 食品表 按条件模糊查询SQL语句 FoodsDAO通过ID(getFoodsByLike)调用此配置 -->
+	<select id="getFoodsByLike" parameterType="foods" resultMap="foodsMap">
+		select a.* , b.catename from foods a , cate b where a.cateid = b.cateid
+		<if test="foodsname != null and '' != foodsname">
+			and a.foodsname like CONCAT('%', CONCAT(#{foodsname}, '%'))
+		</if>
+		<if test="image != null and '' != image">
+			and a.image like CONCAT('%', CONCAT(#{image}, '%'))
+		</if>
+		<if test="cateid != null and '' != cateid">
+			and b.catename like CONCAT('%', CONCAT(#{cateid}, '%'))
+		</if>
+		<if test="price != null and '' != price">
+			and a.price like CONCAT('%', CONCAT(#{price}, '%'))
+		</if>
+		<if test="recommend != null and '' != recommend">
+			and a.recommend like CONCAT('%', CONCAT(#{recommend}, '%'))
+		</if>
+		<if test="special != null and '' != special">
+			and a.special like CONCAT('%', CONCAT(#{special}, '%'))
+		</if>
+		<if test="addtime != null and '' != addtime">
+			and a.addtime like CONCAT('%', CONCAT(#{addtime}, '%'))
+		</if>
+		<if test="hits != null and '' != hits">
+			and a.hits like CONCAT('%', CONCAT(#{hits}, '%'))
+		</if>
+		<if test="sellnum != null and '' != sellnum">
+			and a.sellnum like CONCAT('%', CONCAT(#{sellnum}, '%'))
+		</if>
+		<if test="contents != null and '' != contents">
+			and a.contents like CONCAT('%', CONCAT(#{contents}, '%'))
+		</if>
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

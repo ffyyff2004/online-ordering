@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>网上订餐系统</title>
+    <link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="top_nav">
+            <div class="block">
+                <ul class="top_bav_l">
+                </ul>
+                <div class="header_r">
+                    <font id="ECS_MEMBERZONE" v-if="islogin"> 欢迎光临本站！ <s></s>&nbsp; <span> <a style="color: #FF6766;"
+                        href="login.html">[用户登录]</a> <a style="color: #FF6766;" href="register.html">[用户注册]</a>
+                </span>
+                    </font>
+                    <font id="ECS_MEMBERZONE" v-if="!islogin"> 你好 <b>{{ realname }}</b> <span><a
+                        style="color: #FF6766;" href="cart.html">[购物车]</a><a style="color: #FF6766;" href="usercenter.html">[用户中心]</a> <a
+                        style="color: #FF6766;" href="exit.html">[退出系统] </a> </span>
+                    </font>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="block header">
+                <div class="top">
+                    <a href="index.html" class="logo"><img src="themes/ecmoban_dangdang/images/logo.gif" /></a>
+                    <div class="top_search">
+                        <input name="keywords" type="text" class="keyword" v-model="key" />
+                        <input value="" id="seachbtn" type="button" @click="query">
+                    </div>
+                    <div class="head_r">
+                        <div class="top_shopCart clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="clear: both"></div>
+        <div class="menu_box clearfix">
+            <div class="block">
+                <div class="menu">
+                    <a href="index.html" class="cur" rel="nofollow">网站首页</a>
+                    <a href="article.html" class="cur" rel="nofollow">网站公告</a>
+                    <a href="special.html" class="cur" rel="nofollow">特价食品</a>
+                    <a href="recommend.html" class="cur" rel="nofollow">推荐食品</a>
+                    <a href="all.html" class="cur" rel="nofollow">全部食品</a>
+                </div>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div class="block box">
+            <div class="blank"></div>
+            <div id="ur_here">
+                当前位置: <a href="index.html">首页</a>
+                <code>&gt;</code>
+                <a href="article.html">商城公告</a>
+                <code> &gt; </code> {{article.title}}
+            </div>
+        </div>
+        <div class="blank"></div>
+        <div class="block">
+            <div class="box">
+                <div class="box_1">
+                    <h3>
+                        <span>{{article.title}}</span>
+                    </h3>
+                    <div class="boxCenterList">
+                        <center>
+                            <img :src="'http://localhost:8080/vue_wsdcxt/upfiles/'+article.image" alt="" width="300" height="200" />
+                        </center>
+                        {{article.contents}}
+                    </div>
+                </div>
+            </div>
+            <div class="blank5"></div>
+        </div>
+        <div class="blank"></div>
+        <div id="footer">
+            <div class="footer">
+                <div class="footer_nav_box">
+                    <div class="footer_copyright">
+                        <span> &copy; 网上订餐系统 版权所有，并保留所有权利。<br /> <br />服务时间：09:00-23:00<br /> <br /> <a href="../admin/index.html"
+                            target="_blank">管理员入口</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
+<script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script type="text/javascript" src="../admin/asset/js/vue.js"></script>
+<script type="text/javascript">
+    const vue = new Vue({ // 实例化Vue对象
+        el: '#app', // 绑定作用域
+        data: { //定义数据 用于vue的双向绑定
+            id: '',
+            islogin: '',
+            userid: '',
+            realname: '',
+            article: [],
+            key: '',
+        },
+        methods: {
+            getUrlParam: function() {
+                var name, value;
+                var str = location.href; // 取得整个地址栏
+                var num = str.indexOf("?"); // 定位参数起始位置
+                str = str.substr(num + 1); // 取得所有参数 
+                var arr = str.split("&"); // 各个参数放到数组里
+                for (var i = 0; i < arr.length; i++) {
+                    num = arr[i].indexOf("=");
+                    if (num > 0) {
+                        name = arr[i].substring(0, num);
+                        value = arr[i].substr(num + 1);
+                        this.id = value; // 确认主键参数
+                    }
+                }
+            },
+            loadPage: function() {
+                let _this = this;
+                _this.getUrlParam();
+                axios.get('http://localhost:8080/vue_wsdcxt/index/read.action?id=' + _this.id).then(result => {
+                    _this.article = result.data.article;
+                });
+                _this.userid = sessionStorage.getItem('userid');
+                _this.islogin = sessionStorage.getItem('userid') == null;
+                _this.realname = sessionStorage.getItem('realname');
+            },
+            query: function() {
+                let url = "query.html?id=" + this.key;
+                window.location.href = url;
+            },
+        },
+        created() { // 生命周期相关的函数
+            this.loadPage();
+        },
+    })
+</script>
+
+</html>

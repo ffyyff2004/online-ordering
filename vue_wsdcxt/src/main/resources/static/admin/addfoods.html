@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>添加食品信息</title>
+  <link rel="stylesheet" type="text/css" href="./asset/css/pintuer.css" />
+  <link rel="stylesheet" type="text/css" href="./asset/css/admin.css" />
+</head>
+
+<body>
+  <div class="panel admin-panel" id="app">
+    <div class="body-content">
+      <div class="form-x">
+        <div class="form-group">
+          <div class="label">
+            <label>食品名称：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="foodsname" v-model="foodsname" placeholder="请输入食品名称" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>食品图片：</label>
+          </div>
+          <div class="field">
+            <form id="head-img" enctype="multipart/form-data">
+              <input type="file" name="image" id="image" placeholder="食品图片" />
+              <button type="button" class="button bg-blue margin-left icon-upload" id="btnUpload" @click.prevent="upload()"> 文件上传 </button>
+            </form>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>食品类型：</label>
+          </div>
+          <div class="field">
+            <select id="cateid" title="食品类型" v-model="cateid" class="input" style="width:420px;" >
+              <option :value="item.cateid" v-for="item in cate">{{ item.catename }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>销售价格：</label>
+          </div>
+          <div class="field">
+            <input type="text" class="input" style="width:420px;" id="price" v-model="price" placeholder="请输入销售价格" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>是否推荐：</label>
+          </div>
+          <div class="field" style="padding-top:8px;">
+          	<input type="radio" id="recommend-1" v-model="recommend" value="是" checked>是
+          	<input type="radio" id="recommend-1" v-model="recommend" value="否">否
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>是否特价：</label>
+          </div>
+          <div class="field" style="padding-top:8px;">
+          	<input type="radio" id="special-1" v-model="special" value="是" checked>是
+          	<input type="radio" id="special-1" v-model="special" value="否">否
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label>食品介绍：</label>
+          </div>
+          <div class="field">
+            <textarea class="input" id="contents" v-model="contents" style="height: 220px;" placeholder="请输入食品介绍" ></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="label">
+            <label></label>
+          </div>
+          <div class="field">
+            <button class="button bg-main icon-check" type="button" @click.prevent="save()"> 提交保存</button>
+            <button class="button bg-gray icon-recycle" type="button" @click.prevent="reset()"> 取消重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="./asset/js/jquery.js"></script>
+  <script type="text/javascript" src="./asset/js/pintuer.js"></script>
+  <script type="text/javascript" src="./asset/layui/layui.js"></script>
+  <script type="text/javascript" src="./asset/js/axios.min.js"></script>
+  <script type="text/javascript" src="./asset/js/vue.js"></script>
+	<script type="text/javascript">
+		const vue = new Vue({ // 实例化Vue对象
+			el: '#app',// 绑定作用域
+			data: { //定义数据
+				foodsname: '', // 定义食品名称数据
+				url: '',
+				cateid: '0', // 定义食品类型数据
+				price: '', // 定义销售价格数据
+				recommend: '是', // 定义是否推荐数据
+				special: '是', // 定义是否特价数据
+				contents: '', // 定义食品介绍数据
+				cate: {}, // 用来保存食品类型对象数据
+			},
+			methods: {
+				upload: function () {
+					let _this = this;
+					var formData = new FormData($('#head-img')[0]);
+					axios.post('http://localhost:8080/vue_wsdcxt/ajaxupload/upload.action', formData).then(result => {
+						_this.url = result.data.url;
+						alert('上传成功');
+					});
+				},
+				save: function () {
+					let _this = this;
+					var data = {
+						foodsname: _this.foodsname,
+						image: _this.url,
+						cateid: $('#cateid').val(),
+						price: _this.price,
+						recommend: _this.recommend,
+						special: _this.special,
+						contents: _this.contents,
+					};
+					axios.post('http://localhost:8080/vue_wsdcxt/foods/insertFoods.action', data).then(result => {
+						if (result.data.code > 0) {
+							if (window.confirm('保存成功,是否继续添加？')) {
+								_this.reset();
+							} else {
+								var index = parent.layer.getFrameIndex(window.name);
+								parent.location.reload();
+								parent.layer.close(index);
+							}
+						} else {
+							console.log('保存失败,请稍后再试');
+						}
+					});
+				},
+				reset: function () {
+					this.pageLoad();
+				},
+				pageLoad: function () { // 页面加载
+					this.foodsname= '';
+					this.url= '';
+					this.cateid= '0';
+					this.price= '';
+					this.recommend= '是';
+					this.special= '是';
+					this.contents= '';
+				},
+				validate: function () { // 验证输入非空
+				},
+			},
+			created() { // 生命周期相关的函数
+				let _this = this;
+				axios.get('http://localhost:8080/vue_wsdcxt/cate/getAllCate.action').then(result => {
+					_this.cate = result.data;
+				});
+				_this.pageLoad();
+			},
+		})
+	</script>
+
+</body>
+
+</html>
+
+
