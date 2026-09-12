@@ -1,0 +1,16 @@
+.smart-meal-launcher { position: fixed; right: 28px; bottom: 28px; z-index: 1000; border: 0; border-radius: 28px; padding: 14px 22px; background: #ff6766; color: white; font-size: 16px; cursor: pointer; }
+.smart-meal-mask { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.45); display: flex; align-items: flex-start; justify-content: center; padding: 6vh 16px; box-sizing: border-box; }
+.smart-meal-dialog { width: 720px; max-width: 100%; max-height: 88vh; overflow-y: auto; background: white; border-radius: 12px; padding: 24px; box-sizing: border-box; box-shadow: 0 8px 28px rgba(0,0,0,.25); color: #333; font: 15px/1.6 "Microsoft YaHei", sans-serif; }
+.smart-meal-dialog h2 { font-size: 23px; margin: 0 0 8px; }
+.smart-meal-dialog p { margin: 8px 0; }
+.smart-meal-dialog textarea { display: block; width: 100%; min-height: 90px; margin-top: 6px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font: inherit; resize: vertical; }
+.smart-meal-dialog button { border: 0; border-radius: 5px; padding: 9px 14px; cursor: pointer; font: inherit; }
+.smart-meal-dialog button:disabled { opacity: .6; cursor: default; }
+.smart-meal-primary { background: #ff6766; color: white; }
+.smart-meal-actions { display: flex; justify-content: flex-end; gap: 10px; margin: 12px 0; }
+.smart-meal-card { display: flex; gap: 14px; align-items: center; padding: 16px 0; border-top: 1px solid #eee; }
+.smart-meal-card img { width: 76px; height: 76px; object-fit: cover; border-radius: 6px; }
+.smart-meal-details { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.smart-meal-details h3 { font-size: 17px; margin: 0; }
+.smart-meal-details strong { color: #d94040; }
+@media (max-width: 540px) { .smart-meal-card { flex-wrap: wrap; } .smart-meal-dialog { padding: 18px; } }
