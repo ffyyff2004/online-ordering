@@ -87,17 +87,26 @@
                 methods: {
                     exit: function() {
                         if (window.confirm('确定要退出吗？')) {
-                            sessionStorage.clear(); // 删除sesstion数据
-                            window.location.href = 'index.html';
+                            axios.get('http://localhost:8080/vue_wsdcxt/login/exit.action').then(function() {
+                                sessionStorage.clear();
+                                window.location.href = 'index.html';
+                            });
                         }
                     },
                     editpwd: function() {
                         layer_show('修改密码', 'editpwd.html', 800, 450);
                     },
                     loadPage: function() {
-                        this.adminname = sessionStorage.getItem('adminname');
-                        this.realname = sessionStorage.getItem('realname');
-                        this.role = sessionStorage.getItem('role');
+                        axios.get('http://localhost:8080/vue_wsdcxt/login/session.action').then(function(result) {
+                            if (!result.data.success) {
+                                sessionStorage.clear();
+                                window.location.href = 'index.html';
+                                return;
+                            }
+                            vue.adminname = result.data.adminname;
+                            vue.realname = result.data.realname;
+                            vue.role = result.data.role;
+                        });
                     },
                 },
                 // 生命周期相关的函数

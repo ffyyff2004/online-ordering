@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSONObject;
 import com.boot.entity.Admin;
@@ -31,10 +32,16 @@ public class AdminController extends BaseController {
 	@PostMapping("editpwd.action") // 定义访问方法路径
 	public Map<String, Object> editpwd(@RequestBody String jsonStr) {
 		JSONObject obj = JSONObject.parseObject(jsonStr); // 将传递的Json参数 转换成对象类型
-		String adminid = obj.getString("adminid"); //主键
+		HttpSession session = getSession();
+		String adminid = session == null ? null : (String) session.getAttribute("adminUserId");
 		String password = obj.getString("password"); // 原密码
 		String repassword = obj.getString("repassword"); // 新密码
 		Map<String, Object> map = new HashMap<String, Object>(); // 定义Map 其为返回值
+		if (adminid == null) {
+			map.put("success", false);
+			map.put("message", "登录已失效，请重新登录");
+			return map;
+		}
 		Admin admin = this.adminService.getAdminById(adminid); //
 		if (password.equals(admin.getPassword())) { // 校验原密码是否正确
 			admin.setPassword(repassword); // 重置密码

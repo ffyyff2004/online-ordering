@@ -79,7 +79,6 @@
 				editpwd: function () { // 修改按钮点击事件
 					let _this = this;
 					var data = {
-						adminid: _this.adminid,
 						password: _this.password,
 						repassword: _this.repassword,
 					};
@@ -98,7 +97,6 @@
 
 				},
 				loadPage: function () { // 页面加载
-					this.adminid = sessionStorage.getItem('adminid');
 					this.adminname = sessionStorage.getItem('adminname');
 				},
 			},

@@ -101,19 +101,23 @@
                                 <tr align="center" bgcolor="#ffffff" v-for="item in ordersList" :key="item.ordersid">
                                     <td style="text-align: center">{{ item.ordercode }}</td>
                                     <td style="text-align: center">{{ item.total }}</td>
-                                    <td style="text-align: center">{{ item.status }}</td>
                                     <td style="text-align: center">{{ item.addtime }}</td>
+                                    <td style="text-align: center">{{ item.status }}</td>
                                     <td style="text-align: center">{{ item.receiver }}</td>
                                     <td style="text-align: center">{{ item.address }}</td>
                                     <td style="text-align: center">{{ item.contact }}</td>
                                     <td>
-                                        <span v-if="item.status == '未付款'">
+                                        <span v-if="item.status == '待付款'">
                                             <a :href="'pay.html?id='+item.ordersid" >付款</a>&nbsp;
+                                            <a href="javascript:;" @click="cancelOrder(item.ordersid)">取消订单</a>&nbsp;
                                         </span>
-                                        <span v-if="item.status == '已发货'">
-                                            <a href="javascript:;" @click="toOver(item.ordersid)">确认收货</a>&nbsp;
+                                        <span v-if="item.status == '已付款' || item.status == '已接单'">
+                                            <a href="javascript:;" @click="refundOrder(item.ordersid)">申请退款</a>&nbsp;
                                         </span>
-                                        <span v-if="item.status == '已收货'">
+                                        <span v-if="item.status == '配送中'">
+                                            <a href="javascript:;" @click="toOver(item.ordersid)">确认完成</a>&nbsp;
+                                        </span>
+                                        <span v-if="item.status == '已完成'">
                                             <a :href="'addtopic.html?id='+item.ordersid" >评价订单</a>&nbsp;
                                         </span>
                                         <a :href="'orderdetail.html?id='+item.ordercode">订单明细</a>
@@ -172,6 +176,14 @@
                     }
                 });
             },
+            cancelOrder: function(ordersid) {
+                if (!window.confirm('确定取消该订单吗？')) return;
+                axios.get('http://localhost:8080/vue_wsdcxt/index/cancel.action?id=' + ordersid).then(result => { alert(result.data.message); if (result.data.success) this.loadTable(); });
+            },
+            refundOrder: function(ordersid) {
+                if (!window.confirm('确定申请退款吗？')) return;
+                axios.get('http://localhost:8080/vue_wsdcxt/index/refund.action?id=' + ordersid).then(result => { alert(result.data.message); if (result.data.success) this.loadTable(); });
+            },
             loadPage: function() { // 调用LayUI分页标签的使用
                 let _this = this;
                 _this.userid = sessionStorage.getItem('userid');
@@ -197,7 +209,7 @@
                     if (result.data.code > 0) {
                         this.loadTable();
                     } else {
-                        alert('修改失败');
+                        alert(result.data.message || '修改失败');
                     }
                 });
             },

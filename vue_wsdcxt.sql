@@ -255,9 +255,9 @@ CREATE TABLE `orders` (
 -- Records of orders
 -- ----------------------------
 BEGIN;
-INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406173954757', 'PD20220406173953', 'U20220406165507542', '177.2', '已评价', '2026-05-02', '张三', '中山路28号', '13666666666');
-INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406181823616', 'PD20220406181823', 'U20220406165507542', '105.4', '已收货', '2026-05-27', '张三', '知行东路12号', '13777777777');
-INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220816220826381', 'PD20220816220825', 'U20220406182102296', '63.9', '已评价', '2026-05-24', '李四', '中山路28号', '13777777777');
+INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406173954757', 'PD20220406173953', 'U20220406165507542', '177.2', '已完成', '2026-05-02', '张三', '中山路28号', '13666666666');
+INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220406181823616', 'PD20220406181823', 'U20220406165507542', '105.4', '配送中', '2026-05-27', '张三', '知行东路12号', '13777777777');
+INSERT INTO `orders` (`ordersid`, `ordercode`, `usersid`, `total`, `status`, `addtime`, `receiver`, `address`, `contact`) VALUES ('O20220816220826381', 'PD20220816220825', 'U20220406182102296', '63.9', '已完成', '2026-05-24', '李四', '中山路28号', '13777777777');
 COMMIT;
 
 -- ----------------------------

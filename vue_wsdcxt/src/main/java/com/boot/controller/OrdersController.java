@@ -46,7 +46,7 @@ public class OrdersController extends BaseController {
 		orders.setOrdercode(obj.getString("ordercode")); // 为订单号赋值
 		orders.setUsersid(obj.getString("usersid")); // 为用户赋值
 		orders.setTotal(obj.getString("total")); // 为总计赋值
-		orders.setStatus(""); // 为状态赋值
+		orders.setStatus("待付款"); // 为状态赋值
 		orders.setAddtime(VeDate.getStringDateShort()); // 为日期赋值
 		orders.setReceiver(obj.getString("receiver")); // 为收货人赋值
 		orders.setAddress(obj.getString("address")); // 为送餐地址赋值
@@ -129,11 +129,27 @@ public class OrdersController extends BaseController {
 
 	// 更新订单状态
 	@GetMapping(value = "status.action")
-	public Map<String, Object> status(String id) {
+	public Map<String, Object> status(String id, String targetStatus) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		Orders orders = this.ordersService.getOrdersById(id);
-		String status = "已发货";
-		orders.setStatus(status);
+		if (orders == null) {
+			map.put("success", false);
+			map.put("message", "订单不存在");
+			return map;
+		}
+		String currentStatus = orders.getStatus();
+		boolean valid = ("已付款".equals(currentStatus) && "已接单".equals(targetStatus))
+				|| ("已接单".equals(currentStatus) && "制作中".equals(targetStatus))
+				|| ("制作中".equals(currentStatus) && "配送中".equals(targetStatus))
+				|| ("配送中".equals(currentStatus) && "已完成".equals(targetStatus))
+				|| ("已付款".equals(currentStatus) && "退款中".equals(targetStatus))
+				|| ("退款中".equals(currentStatus) && "已退款".equals(targetStatus));
+		if (!valid) {
+			map.put("success", false);
+			map.put("message", "订单不能从“" + currentStatus + "”变更为“" + targetStatus + "”");
+			return map;
+		}
+		orders.setStatus(targetStatus);
 		int num = this.ordersService.updateOrders(orders);
 		if (num > 0) {
 			map.put("success", true);

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpSession;
+
 import com.alibaba.fastjson.JSONObject;
 import com.boot.entity.Admin;
 import com.boot.service.AdminService;
@@ -27,7 +29,7 @@ public class LoginController extends BaseController {
 
 	// 管理员登录
 	@PostMapping(value = "login.action")
-	public Map<String, Object> login(@RequestBody String jsonStr) {
+	public Map<String, Object> login(@RequestBody String jsonStr, HttpSession session) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		JSONObject obj = JSONObject.parseObject(jsonStr);
 		String username = obj.getString("username");
@@ -41,9 +43,11 @@ public class LoginController extends BaseController {
 		} else {
 			Admin admin = adminlist.get(0);
 			if (password.equals(admin.getPassword())) {
+				session.setAttribute("adminUserId", admin.getAdminid());
+				session.setAttribute("adminUsername", admin.getUsername());
+				session.setAttribute("adminRealname", admin.getRealname());
 				map.put("success", true);
 				map.put("message", "登录成功");
-				map.put("adminid", admin.getAdminid());
 				map.put("adminname", admin.getUsername());
 				map.put("realname", admin.getRealname());
 				map.put("role", "管理员");
@@ -55,9 +59,27 @@ public class LoginController extends BaseController {
 		return map;
 	}
 
+	// 查询当前管理员登录状态
+	@GetMapping("session.action")
+	public Map<String, Object> session(HttpSession session) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String adminId = (String) session.getAttribute("adminUserId");
+		if (adminId == null) {
+			map.put("success", false);
+			map.put("message", "管理员登录已失效，请重新登录");
+			return map;
+		}
+		map.put("success", true);
+		map.put("adminname", session.getAttribute("adminUsername"));
+		map.put("realname", session.getAttribute("adminRealname"));
+		map.put("role", "管理员");
+		return map;
+	}
+
 	// 管理员退出登录
 	@GetMapping("exit.action")
-	public Map<String, Object> exit() {
+	public Map<String, Object> exit(HttpSession session) {
+		session.invalidate();
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("success", true);
 		return map;

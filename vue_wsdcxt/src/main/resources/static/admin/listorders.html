@@ -46,8 +46,12 @@
                 <td style="text-align: center">{{ item.receiver }}</td>
                 <td style="text-align: center">{{ item.address }}</td>
                 <td style="text-align: center">{{ item.contact }}</td>
-                <td style="text-align: center"><span v-if="item.status == '已付款'">
-					<a href="javascript:;" title="发货" @click="status(item.ordersid)">发货</a>
+                <td style="text-align: center">
+                    <span v-if="item.status == '已付款'"><a href="javascript:;" title="接单" @click="status(item.ordersid, '已接单')">接单</a></span>
+                    <span v-if="item.status == '已接单'"><a href="javascript:;" title="开始制作" @click="status(item.ordersid, '制作中')">开始制作</a></span>
+                    <span v-if="item.status == '制作中'"><a href="javascript:;" title="开始配送" @click="status(item.ordersid, '配送中')">开始配送</a></span>
+                    <span v-if="item.status == '配送中'"><a href="javascript:;" title="完成订单" @click="status(item.ordersid, '已完成')">完成订单</a></span>
+                    <span v-if="item.status == '退款中'"><a href="javascript:;" title="确认退款" @click="status(item.ordersid, '已退款')">确认退款</a></span>
                     <a class="button border-red button-small" href="javascript:;" @click="deleteOrders(item.ordersid)"><span class="icon-trash-o"></span> 删除</a>
                 </td>
             </tr>
@@ -143,9 +147,9 @@
                     }
                 });
             },
-            status: function(ordersid) {
+            status: function(ordersid, targetStatus) {
                 let _this = this;
-                axios.get('http://localhost:8080/vue_wsdcxt/orders/status.action?id=' + ordersid).then(result => {
+                axios.get('http://localhost:8080/vue_wsdcxt/orders/status.action?id=' + ordersid + '&targetStatus=' + encodeURIComponent(targetStatus)).then(result => {
                     if (result.data.code > 0) {
                         _this.loadTable();
                     } else {

@@ -71,7 +71,6 @@
             }
             axios.post('http://localhost:8080/vue_wsdcxt/login/login.action', data).then(result => {
               if (result.data.success) {
-                sessionStorage.setItem('adminid', result.data.adminid);
                 sessionStorage.setItem('adminname', result.data.adminname);
                 sessionStorage.setItem('realname', result.data.realname);
                 sessionStorage.setItem('role', result.data.role);

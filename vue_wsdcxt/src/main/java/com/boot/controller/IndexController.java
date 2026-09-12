@@ -417,7 +417,7 @@ public class IndexController extends BaseController {
 			orders.setContact(obj.getString("contact"));
 			orders.setOrdercode(ordercode);
 			orders.setReceiver(obj.getString("receiver"));
-			orders.setStatus("未付款");
+			orders.setStatus("待付款");
 			orders.setTotal("" + VeDate.getDouble(total));
 			orders.setUsersid(obj.getString("userid"));
 			num = this.ordersService.insertOrders(orders);
@@ -439,7 +439,12 @@ public class IndexController extends BaseController {
 	public Map<String, Object> over(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		Orders orders = this.ordersService.getOrdersById(id);
-		orders.setStatus("已收货");
+		if (!"配送中".equals(orders.getStatus())) {
+			map.put("success", false);
+			map.put("message", "只有配送中的订单才能确认完成");
+			return map;
+		}
+		orders.setStatus("已完成");
 		int num = this.ordersService.updateOrders(orders);
 		if (num > 0) {
 			map.put("success", true);
@@ -458,6 +463,11 @@ public class IndexController extends BaseController {
 	public Map<String, Object> pay(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		Orders orders = this.ordersService.getOrdersById(id);
+		if (!"待付款".equals(orders.getStatus())) {
+			map.put("success", false);
+			map.put("message", "当前订单不能付款");
+			return map;
+		}
 		orders.setStatus("已付款");
 		int num = this.ordersService.updateOrders(orders);
 		if (num > 0) {
@@ -477,6 +487,11 @@ public class IndexController extends BaseController {
 	public Map<String, Object> cancel(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		Orders orders = this.ordersService.getOrdersById(id);
+		if (!"待付款".equals(orders.getStatus()) && !"已付款".equals(orders.getStatus())) {
+			map.put("success", false);
+			map.put("message", "当前订单不能取消");
+			return map;
+		}
 		orders.setStatus("已取消");
 		int num = this.ordersService.updateOrders(orders);
 		if (num > 0) {
@@ -488,6 +503,24 @@ public class IndexController extends BaseController {
 			map.put("code", num);
 			map.put("message", "取消失败");
 		}
+		return map;
+	}
+
+	// 申请退款
+	@RequestMapping(value = "refund.action")
+	public Map<String, Object> refund(String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Orders orders = this.ordersService.getOrdersById(id);
+		if (orders == null || (!"已付款".equals(orders.getStatus()) && !"已接单".equals(orders.getStatus()))) {
+			map.put("success", false);
+			map.put("message", "当前订单不能申请退款");
+			return map;
+		}
+		orders.setStatus("退款中");
+		int num = this.ordersService.updateOrders(orders);
+		map.put("success", num > 0);
+		map.put("code", num);
+		map.put("message", num > 0 ? "退款申请已提交" : "退款申请失败");
 		return map;
 	}
 
@@ -760,8 +793,11 @@ public class IndexController extends BaseController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		JSONObject obj = JSONObject.parseObject(jsonStr); // 将JSON字符串转换成object
 		Orders orders = this.ordersService.getOrdersById(obj.getString("ordersid"));
-		orders.setStatus("已评价");
-		this.ordersService.updateOrders(orders);
+		if (orders == null || !"已完成".equals(orders.getStatus())) {
+			map.put("success", false);
+			map.put("message", "只有已完成的订单才能评价");
+			return map;
+		}
 		JSONArray detailsList = JSONArray.parseArray(obj.getString("detailsList"));
 		int num = 0;
 		for (int i = 0; i < detailsList.size(); i++) {
