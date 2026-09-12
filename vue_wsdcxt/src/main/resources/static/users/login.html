@@ -82,6 +82,7 @@
                                     <tr>
                                         <td colspan="2" align="center" bgcolor="#FFFFFF"><input type="button" class="bnt_blue_1" style="border: none;" value="确认登录" @click="toLogin()" /></td>
                                     </tr>
+                                    <tr><td colspan="2" align="center" bgcolor="#FFFFFF"><a href="forgotpwd.html">忘记密码</a>　<a href="register.html">用户注册</a></td></tr>
                                 </table>
                             </td>
                         </tr>
@@ -114,6 +115,7 @@
         data: { //定义数据 用于vue的双向绑定
             username: '', // 用户名
             password: '', // 密码
+            loginFailures: Number(sessionStorage.getItem('loginFailures') || 0),
             islogin: '',
             userid: '',
             realname: '',
@@ -135,12 +137,15 @@
                     }
                     axios.post('http://localhost:8080/vue_wsdcxt/index/login.action', data).then(result => {
                         if (result.data.success) {
+                            sessionStorage.removeItem('loginFailures');
                             sessionStorage.setItem('userid', result.data.userid);
                             sessionStorage.setItem('username', result.data.username);
                             sessionStorage.setItem('realname', result.data.realname);
                             window.location.href = 'index.html';
                         } else {
-                            alert(result.data.message);
+                            _this.loginFailures++;
+                            sessionStorage.setItem('loginFailures', _this.loginFailures);
+                            alert(result.data.message + (_this.loginFailures >= 3 ? '\n连续失败3次，可点击下方找回密码。' : ''));
                             _this.reset();
                         }
                     })

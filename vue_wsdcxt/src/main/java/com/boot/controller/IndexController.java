@@ -133,6 +133,11 @@ public class IndexController extends BaseController {
 		JSONObject obj = JSONObject.parseObject(jsonStr);
 		String username = obj.getString("username");
 		String password = obj.getString("password");
+		if (username == null || username.trim().isEmpty() || password == null || password.isEmpty()) {
+			map.put("success", false);
+			map.put("message", "请输入用户名和密码");
+			return map;
+		}
 		Users usersEntity = new Users();
 		usersEntity.setUsername(username);
 		List<Users> userslist = this.usersService.getUsersByCond(usersEntity);
@@ -167,6 +172,23 @@ public class IndexController extends BaseController {
 		users.setBirthday(obj.getString("birthday"));
 		users.setContact(obj.getString("contact"));
 		users.setRealname(obj.getString("realname"));
+		if (users.getUsername() == null || users.getUsername().trim().isEmpty()
+				|| users.getPassword() == null || users.getPassword().isEmpty()
+				|| users.getRealname() == null || users.getRealname().trim().isEmpty()
+				|| users.getContact() == null || users.getContact().trim().isEmpty()) {
+			map.put("success", false);
+			map.put("code", 0);
+			map.put("message", "请完整填写用户名、密码、姓名和联系方式");
+			return map;
+		}
+		Users condition = new Users();
+		condition.setUsername(users.getUsername().trim());
+		if (!this.usersService.getUsersByCond(condition).isEmpty()) {
+			map.put("success", false);
+			map.put("code", 0);
+			map.put("message", "用户名已存在，请更换用户名");
+			return map;
+		}
 		users.setRegdate(VeDate.getStringDateShort());
 		int num = this.usersService.insertUsers(users);
 		if (num > 0) {
@@ -178,6 +200,36 @@ public class IndexController extends BaseController {
 			map.put("code", num);
 			map.put("message", "注册失败");
 		}
+		return map;
+	}
+
+	// 忘记密码：使用用户名和注册联系方式验证身份后重置密码
+	@PostMapping(value = "forgotpwd.action")
+	public Map<String, Object> forgotpwd(@RequestBody String jsonStr) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		JSONObject obj = JSONObject.parseObject(jsonStr);
+		String username = obj.getString("username");
+		String contact = obj.getString("contact");
+		String newPassword = obj.getString("newPassword");
+		if (username == null || username.trim().isEmpty() || contact == null || contact.trim().isEmpty() || newPassword == null || newPassword.isEmpty()) {
+			map.put("success", false);
+			map.put("message", "请完整填写用户名、联系方式和新密码");
+			return map;
+		}
+		Users condition = new Users();
+		condition.setUsername(username.trim());
+		List<Users> userslist = this.usersService.getUsersByCond(condition);
+		if (userslist.isEmpty() || !contact.trim().equals(userslist.get(0).getContact())) {
+			map.put("success", false);
+			map.put("message", "用户名或联系方式不匹配");
+			return map;
+		}
+		Users users = userslist.get(0);
+		users.setPassword(newPassword);
+		int num = this.usersService.updateUsers(users);
+		map.put("success", num > 0);
+		map.put("code", num);
+		map.put("message", num > 0 ? "密码重置成功，请使用新密码登录" : "密码重置失败，请稍后再试");
 		return map;
 	}
 

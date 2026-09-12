@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="utf-8"><title>找回密码 - 网上订餐系统</title><link href="./themes/ecmoban_dangdang/style.css" rel="stylesheet"></head>
+<body><div id="app" class="block box"><h3><span>找回密码</span></h3>
+<p>用户名：<input class="inputBg" v-model="username"></p>
+<p>联系方式：<input class="inputBg" v-model="contact"></p>
+<p>新密码：<input type="password" class="inputBg" v-model="newPassword"></p>
+<p>确认密码：<input type="password" class="inputBg" v-model="confirmPassword"></p>
+<p><input type="button" value="重置密码" @click="resetPassword"></p><p><a href="login.html">返回登录</a></p></div>
+<script src="../admin/asset/js/axios.min.js"></script><script src="../admin/asset/js/vue.js"></script><script>
+new Vue({el:'#app',data:{username:'',contact:'',newPassword:'',confirmPassword:''},methods:{resetPassword:function(){var self=this;if(!self.username||!self.contact||!self.newPassword||self.newPassword!==self.confirmPassword){alert('请正确填写信息');return;}axios.post('/vue_wsdcxt/index/forgotpwd.action',{username:self.username,contact:self.contact,newPassword:self.newPassword}).then(function(result){alert(result.data.message);if(result.data.success){window.location.href='login.html';}}).catch(function(){alert('网络异常，请稍后再试');});}}});
+</script></body></html>

@@ -164,6 +164,10 @@
             },
             toRegister: function() {
                 let _this = this;
+                if (!_this.username.trim() || !_this.password || !_this.realname.trim() || !_this.contact.trim()) {
+                    alert('请完整填写用户名、密码、姓名和联系方式');
+                    return;
+                }
                 var data = {
                     username: _this.username,
                     password: _this.password,
