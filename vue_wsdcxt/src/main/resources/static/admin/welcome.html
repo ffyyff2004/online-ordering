@@ -1,2 +1,53 @@
 <!DOCTYPE html>
-
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>运营首页 - 网上订餐系统</title>
+    <link rel="stylesheet" type="text/css" href="./asset/css/pintuer.css">
+    <link rel="stylesheet" type="text/css" href="./asset/css/admin.css">
+    <style>
+        [v-cloak] { display: none; }
+        body { background: #f2f9fd; }
+        .operation-page { padding: 20px; }
+        .operation-title { margin: 0 0 8px; color: #333; }
+        .operation-date { color: #999; margin-bottom: 18px; }
+        .operation-grid { display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 16px; }
+        .operation-card, .operation-section { background: #fff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+        .operation-card { padding: 20px; }
+        .operation-card h4 { margin: 0 0 12px; color: #777; font-weight: normal; }
+        .operation-card strong { font-size: 28px; color: #1abc9c; }
+        .operation-section { margin-top: 18px; padding: 18px 22px; }
+        .operation-section h3 { margin: 0 0 14px; color: #333; }
+        .hot-table { width: 100%; border-collapse: collapse; }
+        .hot-table th, .hot-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        .hot-table th { color: #777; font-weight: normal; }
+        .empty-state { color: #999; padding: 12px 0; }
+        .error-state { color: #d9534f; padding: 12px 0; }
+        @media (max-width: 800px) { .operation-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak class="operation-page">
+    <h2 class="operation-title">运营首页</h2>
+    <div class="operation-date">统计日期：{{ date }} <button class="button button-small" @click="loadData">刷新数据</button></div>
+    <div v-if="error" class="error-state">{{ error }}</div>
+    <div class="operation-grid">
+        <div class="operation-card"><h4>今日订单数</h4><strong>{{ todayOrderCount }}</strong></div>
+        <div class="operation-card"><h4>今日营业额</h4><strong>￥{{ todayTurnover }}</strong></div>
+        <div class="operation-card"><h4>待处理订单</h4><strong>{{ pendingOrderCount }}</strong></div>
+        <div class="operation-card"><h4>用户数量</h4><strong>{{ userCount }}</strong></div>
+    </div>
+    <div class="operation-section">
+        <h3>热销餐品</h3>
+        <table class="hot-table" v-if="hotFoods.length"><thead><tr><th>排名</th><th>餐品名称</th><th>销量</th><th>价格</th></tr></thead><tbody><tr v-for="(food,index) in hotFoods" :key="food.foodsid"><td>{{ index + 1 }}</td><td>{{ food.foodsname }}</td><td>{{ food.sellnum }}</td><td>￥{{ food.price }}</td></tr></tbody></table>
+        <div v-else class="empty-state">暂无热销餐品数据</div>
+    </div>
+</div>
+<script src="./asset/js/axios.min.js"></script>
+<script src="./asset/js/vue.js"></script>
+<script>
+new Vue({el:'#app',data:{date:'',todayOrderCount:0,todayTurnover:'0.00',pendingOrderCount:0,userCount:0,hotFoods:[],error:''},methods:{loadData:function(){var self=this;axios.get('http://localhost:8080/vue_wsdcxt/admin/operation.action').then(function(result){if(!result.data.success){self.error=result.data.message||'管理员登录已失效';return;}self.date=result.data.date;self.todayOrderCount=result.data.todayOrderCount;self.todayTurnover=result.data.todayTurnover;self.pendingOrderCount=result.data.pendingOrderCount;self.userCount=result.data.userCount;self.hotFoods=result.data.hotFoods||[];}).catch(function(){self.error='统计数据加载失败，请稍后重试';});}},created:function(){this.loadData();}});
+</script>
+</body>
+</html>

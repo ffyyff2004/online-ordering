@@ -3,6 +3,9 @@ package com.boot.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +20,12 @@ import javax.servlet.http.HttpSession;
 import com.alibaba.fastjson.JSONObject;
 import com.boot.entity.Admin;
 import com.boot.service.AdminService;
+import com.boot.service.OrdersService;
+import com.boot.service.FoodsService;
+import com.boot.service.UsersService;
+import com.boot.entity.Orders;
+import com.boot.entity.Foods;
+import com.boot.entity.Users;
 import com.boot.util.VeDate;
 import com.github.pagehelper.Page;
 
@@ -28,6 +37,50 @@ public class AdminController extends BaseController {
 
 	@Autowired // @Autowired的作用是自动注入依赖的ServiceBean
 	private AdminService adminService;
+	@Autowired
+	private OrdersService ordersService;
+	@Autowired
+	private FoodsService foodsService;
+	@Autowired
+	private UsersService usersService;
+
+	@GetMapping("operation.action")
+	public Map<String, Object> operation(HttpSession session) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		if (session.getAttribute("adminUserId") == null) {
+			map.put("success", false);
+			map.put("message", "管理员登录已失效，请重新登录");
+			return map;
+		}
+		String today = LocalDate.now().toString();
+		List<Orders> orders = this.ordersService.getAllOrders();
+		int todayOrderCount = 0;
+		double todayTurnover = 0;
+		int pendingOrderCount = 0;
+		for (Orders order : orders) {
+			if (order.getAddtime() != null && order.getAddtime().startsWith(today)) {
+				todayOrderCount++;
+				String status = order.getStatus();
+				if (!"待付款".equals(status) && !"已取消".equals(status) && !"退款中".equals(status) && !"已退款".equals(status)) {
+					todayTurnover += Double.parseDouble(order.getTotal());
+				}
+			}
+			if ("待付款".equals(order.getStatus()) || "已付款".equals(order.getStatus()) || "已接单".equals(order.getStatus()) || "制作中".equals(order.getStatus()) || "配送中".equals(order.getStatus()) || "退款中".equals(order.getStatus())) {
+				pendingOrderCount++;
+			}
+		}
+		List<Foods> hotFoods = new ArrayList<Foods>(this.foodsService.getAllFoods());
+		hotFoods.sort(Comparator.comparingInt((Foods food) -> Integer.parseInt(food.getSellnum() == null ? "0" : food.getSellnum())).reversed());
+		if (hotFoods.size() > 5) hotFoods = hotFoods.subList(0, 5);
+		map.put("success", true);
+		map.put("date", today);
+		map.put("todayOrderCount", todayOrderCount);
+		map.put("todayTurnover", String.format("%.2f", todayTurnover));
+		map.put("pendingOrderCount", pendingOrderCount);
+		map.put("hotFoods", hotFoods);
+		map.put("userCount", this.usersService.getAllUsers().size());
+		return map;
+	}
 
 	@PostMapping("editpwd.action") // 定义访问方法路径
 	public Map<String, Object> editpwd(@RequestBody String jsonStr) {
