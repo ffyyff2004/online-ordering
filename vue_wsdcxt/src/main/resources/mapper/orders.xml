@@ -16,7 +16,6 @@
 		<result property="contact" column="contact" />
 		<result property="username" column="username" />
 		<!-- 通过外键关联查询  返回封装Users对象 -->
-		<association property="users" column="usersid" select="com.boot.dao.UsersDAO.getUsersById" javaType="com.boot.entity.Users" />
 	</resultMap>
 
 	<!-- 订单表 插入SQL语句  OrdersDAO通过ID(insertOrders)调用此配置 -->

@@ -247,7 +247,7 @@
         <div class="blank"></div>
         <div class="block table">
             <header class="am-header">
-                <h1>支付宝电脑网站支付体验入口页</h1>
+                <h1>本地模拟付款（不会真实扣款）</h1>
             </header>
             <hr class="one_line">
             <div id="main">
@@ -294,6 +294,7 @@
 </body>
 <script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
 <script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script src="../order-access.js"></script>
 <script type="text/javascript" src="../admin/asset/js/vue.js"></script>
 <script type="text/javascript">
     const vue = new Vue({ // 实例化Vue对象
@@ -335,7 +336,7 @@
             },
             toPay: function() {
                 let _this = this;
-                axios.get('http://localhost:8080/vue_wsdcxt/index/pay.action?id=' + _this.ordersid).then(result => {
+                axios.post('http://localhost:8080/vue_wsdcxt/index/pay.action?id=' + _this.ordersid).then(result => {
                     if (result.data.code > 0) {
                         window.location.href = "orderslist.html";
                     } else {

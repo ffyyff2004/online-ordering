@@ -13,6 +13,7 @@
 </body>
 <script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
 <script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script src="../order-access.js"></script>
 <script type="text/javascript" src="../admin/asset/js/vue.js"></script>
 <script type="text/javascript">
     const vue = new Vue({ // 实例化Vue对象
@@ -23,8 +24,10 @@
 
         },
         created() { // 生命周期相关的函数
-            sessionStorage.clear();
-            window.location.href = 'index.html';
+            axios.post('../index/logout.action').then(() => {
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            });
         },
     })
 </script>

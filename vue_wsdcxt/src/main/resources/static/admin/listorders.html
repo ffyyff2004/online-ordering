@@ -15,15 +15,20 @@
     <div class="padding border-bottom">
         <ul class="search" style="padding-left:10px;">
             <li> <input type="text" name="keywords" class="input" id="keywords" v-model="keywords" placeholder="请输入订单号" style="width:250px; line-height:17px;display:inline-block" /> <a class="button border-blue icon-search" title="查询" @click="query()"> 查询</a>                </li>
-            <li> <a class="button border-red icon-trash-o" title="批量删除" @click="datadel()"> 批量删除</a> </li>
             <li> <a class="button border-green icon-recycle" href="javascript:;" title="刷新数据" onclick="location.reload()">
             刷新数据</a> </li>
         </ul>
     </div>
+    <p class="padding">取消配送将恢复为制作中，可重新配送；已付款订单取消后进入退款审核。退款仅为本地模拟登记，不涉及真实资金。</p>
+    <div class="padding" v-if="historyVisible">
+        <strong>操作记录 / 退款原因</strong> <button @click="historyVisible=false">关闭</button>
+        <p v-if="!events.length">暂无操作记录</p>
+        <p v-for="(event, index) in events" :key="index">{{ event.created_at }} · {{ event.actor_role == 'admin' ? '管理员' : '用户' }} · {{ event.from_status }} → {{ event.to_status }} · {{ event.reason || '无备注' }}</p>
+    </div>
     <table class="table table-hover text-center">
         <thead>
             <tr>
-                <th style="text-align: center" width="50">&nbsp;</th>
+                <th style="text-align: center" width="50">序号</th>
                 <th style="text-align: center">订单号</th>
                 <th style="text-align: center">用户</th>
                 <th style="text-align: center">总计</th>
@@ -36,8 +41,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="item in orders" :key="item.ordersid">
-                <td style="text-align: center"><input type="checkbox" :value="item.ordersid" placeholder="请选择" v-model="ids"></td>
+            <tr v-for="(item, index) in orders" :key="item.ordersid">
+                <td style="text-align: center">{{ (page - 1) * limit + index + 1 }}</td>
                 <td style="text-align: center">{{ item.ordercode }}</td>
                 <td style="text-align: center">{{ item.username }}</td>
                 <td style="text-align: center">{{ item.total }}</td>
@@ -47,12 +52,13 @@
                 <td style="text-align: center">{{ item.address }}</td>
                 <td style="text-align: center">{{ item.contact }}</td>
                 <td style="text-align: center">
-                    <span v-if="item.status == '已付款'"><a href="javascript:;" title="接单" @click="status(item.ordersid, '已接单')">接单</a></span>
-                    <span v-if="item.status == '已接单'"><a href="javascript:;" title="开始制作" @click="status(item.ordersid, '制作中')">开始制作</a></span>
-                    <span v-if="item.status == '制作中'"><a href="javascript:;" title="开始配送" @click="status(item.ordersid, '配送中')">开始配送</a></span>
-                    <span v-if="item.status == '配送中'"><a href="javascript:;" title="完成订单" @click="status(item.ordersid, '已完成')">完成订单</a></span>
-                    <span v-if="item.status == '退款中'"><a href="javascript:;" title="确认退款" @click="status(item.ordersid, '已退款')">确认退款</a></span>
-                    <a class="button border-red button-small" href="javascript:;" @click="deleteOrders(item.ordersid)"><span class="icon-trash-o"></span> 删除</a>
+                    <span v-if="item.status == '已付款'"><a href="javascript:;" @click="status(item.ordersid, 'accept')">接单</a> </span>
+                    <span v-if="item.status == '已接单'"><a href="javascript:;" @click="status(item.ordersid, 'prepare')">开始制作</a> </span>
+                    <span v-if="item.status == '制作中'"><a href="javascript:;" @click="status(item.ordersid, 'dispatch')">开始配送</a> </span>
+                    <span v-if="item.status == '配送中'"><a href="javascript:;" @click="status(item.ordersid, 'complete')">完成订单</a> <a href="javascript:;" @click="status(item.ordersid, 'cancelDelivery')">取消配送</a> </span>
+                    <span v-if="['待付款','已付款','已接单','制作中'].indexOf(item.status) >= 0"><a href="javascript:;" @click="status(item.ordersid, 'cancel')">取消订单</a> </span>
+                    <span v-if="item.status == '退款中'"><a href="javascript:;" @click="status(item.ordersid, 'approveRefund')">同意退款</a> <a href="javascript:;" @click="status(item.ordersid, 'rejectRefund')">拒绝退款</a> </span>
+                    <a href="javascript:;" @click="history(item.ordersid)">操作记录</a>
                 </td>
             </tr>
             <tr>
@@ -71,10 +77,12 @@
 <script type="text/javascript" src="./asset/js/tool.js"></script>
 <script type="text/javascript" src="./asset/js/axios.min.js"></script>
 <script type="text/javascript" src="./asset/js/vue.js"></script>
+<script src="../order-access.js"></script>
 <script type="text/javascript">
     const vue = new Vue({ // 实例化Vue对象
         el: '#app', // 绑定作用域
-        data: { //定义数据
+        data: {
+            busy: false, events: [], historyVisible: false, //定义数据
             orders: [],
             ids: [], // 定义批量删除的数组
             page: {},
@@ -113,30 +121,6 @@
                     });
                 })
             },
-            deleteOrders: function(ordersid) { // 根据主键删除订单信息
-                let _this = this;
-                if (window.confirm('确定要删除这条记录吗？')) {
-                    axios.get('http://localhost:8080/vue_wsdcxt/orders/deleteOrders.action?id=' + ordersid).then(result => {
-                        if (result.data.code > 0) {
-                            _this.loadTable();
-                        } else {
-                            alert('系统错误，请稍后再试');
-                        }
-                    });
-                }
-            },
-            datadel: function() { // 批量删除订单信息
-                let _this = this;
-                if (window.confirm('确定要批量删除记录吗？')) {
-                    axios.post('http://localhost:8080/vue_wsdcxt/orders/deleteOrdersByIds.action', _this.ids).then(result => {
-                        if (result.data.code > 0) {
-                            _this.loadTable();
-                        } else {
-                            alert('系统错误，请稍后再试');
-                        }
-                    });
-                }
-            },
             query: function() {
                 let _this = this;
                 axios.get('http://localhost:8080/vue_wsdcxt/orders/getOrders.action?page=' + _this.page + '&limit=' + _this.limit + '&keywords=' + _this.keywords).then(result => {
@@ -147,15 +131,27 @@
                     }
                 });
             },
-            status: function(ordersid, targetStatus) {
-                let _this = this;
-                axios.get('http://localhost:8080/vue_wsdcxt/orders/status.action?id=' + ordersid + '&targetStatus=' + encodeURIComponent(targetStatus)).then(result => {
-                    if (result.data.code > 0) {
-                        _this.loadTable();
-                    } else {
-                        alert('系统错误，请稍后再试');
-                    }
-                });
+            status: function(ordersid, action) {
+                if (this.busy) return;
+                const prompts = {cancel: '请输入取消原因（已付款订单进入退款审核）', cancelDelivery: '请输入取消配送原因（恢复为制作中）', approveRefund: '请输入退款审核备注（仅模拟退款）', rejectRefund: '请输入拒绝退款原因'};
+                let reason = '';
+                if (prompts[action]) {
+                    reason = window.prompt(prompts[action]);
+                    if (reason === null) return;
+                    if (!reason.trim() || reason.trim().length > 500) { alert('请填写1到500字的原因'); return; }
+                }
+                if (!window.confirm('确定执行此订单操作吗？')) return;
+                this.busy = true;
+                axios.post('../orders/status.action', {id: ordersid, action: action, reason: reason}).then(result => {
+                    alert(result.data.message);
+                    if (result.data.success) { this.historyVisible = false; this.loadTable(); }
+                }).catch(() => {}).finally(() => { this.busy = false; });
+            },
+            history: function(ordersid) {
+                axios.get('../orders/history.action?id=' + encodeURIComponent(ordersid)).then(result => {
+                    this.events = result.data;
+                    this.historyVisible = true;
+                }).catch(() => {});
             },
             getOrdersById: function(ordersid) { // 编辑按钮点击事件
                 let url = 'editorders.html?id=' + ordersid;

@@ -22,12 +22,18 @@ class SmartMealCartIntegrationTest {
     @Autowired private CartService cart;
     @Autowired private ObjectMapper mapper;
 
+    @org.junit.jupiter.api.AfterEach
+    void clearRequest() { org.springframework.web.context.request.RequestContextHolder.resetRequestAttributes(); }
+
     @Test
     void twoIndividuallySelectedDishesWriteTwoCartRowsAndRollback() throws Exception {
         String userid = users.getAllUsers().get(0).getUsersid();
         List<Foods> menu = foods.getAllFoods();
         Cart filter = new Cart();
         filter.setUsersid(userid);
+        org.springframework.mock.web.MockHttpServletRequest requestContext = new org.springframework.mock.web.MockHttpServletRequest();
+        requestContext.getSession().setAttribute("userId", userid);
+        org.springframework.web.context.request.RequestContextHolder.setRequestAttributes(new org.springframework.web.context.request.ServletRequestAttributes(requestContext));
         int before = cart.getCartByCond(filter).size();
         for (int selected = 0; selected < 2; selected++) {
             Foods food = menu.get(selected);

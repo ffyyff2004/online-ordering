@@ -28,6 +28,9 @@ public class OrdersController extends BaseController {
 	@Autowired // @Autowired的作用是自动注入依赖的ServiceBean
 	private OrdersService ordersService;
 
+    @Autowired
+    private com.boot.service.OrderWorkflow workflow;
+
 	// 预处理 获取基础参数
 	@GetMapping(value = "createOrders.action")
 	public Map<String, Object> createOrders() {
@@ -128,40 +131,15 @@ public class OrdersController extends BaseController {
 	}
 
 	// 更新订单状态
-	@GetMapping(value = "status.action")
-	public Map<String, Object> status(String id, String targetStatus) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Orders orders = this.ordersService.getOrdersById(id);
-		if (orders == null) {
-			map.put("success", false);
-			map.put("message", "订单不存在");
-			return map;
-		}
-		String currentStatus = orders.getStatus();
-		boolean valid = ("已付款".equals(currentStatus) && "已接单".equals(targetStatus))
-				|| ("已接单".equals(currentStatus) && "制作中".equals(targetStatus))
-				|| ("制作中".equals(currentStatus) && "配送中".equals(targetStatus))
-				|| ("配送中".equals(currentStatus) && "已完成".equals(targetStatus))
-				|| ("已付款".equals(currentStatus) && "退款中".equals(targetStatus))
-				|| ("退款中".equals(currentStatus) && "已退款".equals(targetStatus));
-		if (!valid) {
-			map.put("success", false);
-			map.put("message", "订单不能从“" + currentStatus + "”变更为“" + targetStatus + "”");
-			return map;
-		}
-		orders.setStatus(targetStatus);
-		int num = this.ordersService.updateOrders(orders);
-		if (num > 0) {
-			map.put("success", true);
-			map.put("code", num);
-			map.put("message", "修改成功");
-		} else {
-			map.put("success", false);
-			map.put("code", num);
-			map.put("message", "修改失败");
-		}
-		return map;
-	}
+    @PostMapping("status.action")
+    public Map<String, Object> status(@RequestBody Map<String, String> request, javax.servlet.http.HttpSession session) {
+        return workflow.act(request.get("id"), request.get("action"), request.get("reason"), "admin", (String) session.getAttribute("adminUserId"));
+    }
+
+    @GetMapping("history.action")
+    public List<Map<String, Object>> history(String id) {
+        return workflow.history(id);
+    }
 
 	// 查询全部订单数据 在下拉菜单中显示
 	@GetMapping(value = "getAllOrders.action")

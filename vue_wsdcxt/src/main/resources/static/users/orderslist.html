@@ -107,6 +107,7 @@
                                     <td style="text-align: center">{{ item.address }}</td>
                                     <td style="text-align: center">{{ item.contact }}</td>
                                     <td>
+                                        <a href="javascript:;" @click="orderHistory(item.ordersid)">操作记录 / 退款结果</a>&nbsp;
                                         <span v-if="item.status == '待付款'">
                                             <a :href="'pay.html?id='+item.ordersid" >付款</a>&nbsp;
                                             <a href="javascript:;" @click="cancelOrder(item.ordersid)">取消订单</a>&nbsp;
@@ -149,6 +150,7 @@
 <script type="text/javascript" src="../admin/asset/layui/layui.js"></script>
 <script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
 <script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script src="../order-access.js"></script>
 <script type="text/javascript" src="../admin/asset/js/vue.js"></script>
 <script type="text/javascript">
     const vue = new Vue({ // 实例化Vue对象
@@ -176,13 +178,21 @@
                     }
                 });
             },
+            orderHistory: function(ordersid) {
+                axios.get('../index/orderHistory.action?id=' + encodeURIComponent(ordersid)).then(result => {
+                    const records = result.data.map(event => event.created_at + '：' + event.from_status + ' → ' + event.to_status + '，' + (event.reason || '无备注'));
+                    alert(records.length ? records.join('\n') : '暂无操作记录');
+                }).catch(() => {});
+            },
             cancelOrder: function(ordersid) {
                 if (!window.confirm('确定取消该订单吗？')) return;
-                axios.get('http://localhost:8080/vue_wsdcxt/index/cancel.action?id=' + ordersid).then(result => { alert(result.data.message); if (result.data.success) this.loadTable(); });
+                axios.post('http://localhost:8080/vue_wsdcxt/index/cancel.action?id=' + ordersid).then(result => { alert(result.data.message); if (result.data.success) this.loadTable(); });
             },
             refundOrder: function(ordersid) {
-                if (!window.confirm('确定申请退款吗？')) return;
-                axios.get('http://localhost:8080/vue_wsdcxt/index/refund.action?id=' + ordersid).then(result => { alert(result.data.message); if (result.data.success) this.loadTable(); });
+                const reason = window.prompt('请输入退款原因（1到500字）：');
+                if (reason === null) return;
+                if (!reason.trim() || reason.trim().length > 500) { alert('请填写1到500字的退款原因'); return; }
+                axios.post('../index/refund.action?id=' + encodeURIComponent(ordersid) + '&reason=' + encodeURIComponent(reason.trim())).then(result => { alert(result.data.message); if (result.data.success) this.loadTable(); });
             },
             loadPage: function() { // 调用LayUI分页标签的使用
                 let _this = this;
@@ -205,7 +215,7 @@
                 })
             },
             toOver: function(ordersid) {
-                axios.get('http://localhost:8080/vue_wsdcxt/index/over.action?id=' + ordersid).then(result => {
+                axios.post('http://localhost:8080/vue_wsdcxt/index/over.action?id=' + ordersid).then(result => {
                     if (result.data.code > 0) {
                         this.loadTable();
                     } else {

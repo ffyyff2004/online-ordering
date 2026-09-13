@@ -147,6 +147,8 @@ public class IndexController extends BaseController {
 		} else {
 			Users users = userslist.get(0);
 			if (password.equals(users.getPassword())) {
+                getSession().setAttribute("userId", users.getUsersid());
+                getRequest().changeSessionId();
 				map.put("success", true);
 				map.put("message", "登录成功");
 				map.put("userid", users.getUsersid());
@@ -233,6 +235,27 @@ public class IndexController extends BaseController {
 		return map;
 	}
 
+
+    @Autowired
+    private com.boot.service.OrderWorkflow workflow;
+
+    private String currentUserId() {
+        javax.servlet.http.HttpSession session = getRequest().getSession(false);
+        String id = session == null ? null : (String) session.getAttribute("userId");
+        if (id == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "请重新登录");
+        return id;
+    }
+
+    @GetMapping("orderHistory.action")
+    public List<Map<String, Object>> orderHistory(String id) {
+        return workflow.history(id);
+    }
+
+    @PostMapping("logout.action")
+    public Map<String, Object> logout() {
+        getSession().removeAttribute("userId");
+        return java.util.Collections.<String, Object>singletonMap("success", true);
+    }
 	// 修改密码
 	@PostMapping(value = "editpwd.action")
 	public Map<String, Object> editpwd(@RequestBody String jsonStr) {
@@ -299,6 +322,7 @@ public class IndexController extends BaseController {
 	// 查看购物车
 	@GetMapping(value = "cart.action")
 	public Map<String, Object> cart(String userid) {
+        userid = currentUserId();
 		Map<String, Object> map = new HashMap<String, Object>();
 		Cart cart = new Cart();
 		cart.setUsersid(userid);
@@ -309,7 +333,7 @@ public class IndexController extends BaseController {
 	}
 
 	// 删除购物车中的商品
-	@RequestMapping(value = "deletecart.action")
+	@PostMapping(value = "deletecart.action")
 	public Map<String, Object> deletecart(String id) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		int num = this.cartService.deleteCart(id);
@@ -329,6 +353,7 @@ public class IndexController extends BaseController {
 	@RequestMapping(value = "showOrders.action")
 	public Map<String, Object> showOrders(@RequestParam(defaultValue = "1") Integer page,
 			@RequestParam(defaultValue = "10") Integer limit, String userid) {
+        userid = currentUserId();
 		Map<String, Object> map = new HashMap<String, Object>();
 		Orders orders = new Orders();
 		orders.setUsersid(userid);
@@ -362,11 +387,15 @@ public class IndexController extends BaseController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		JSONObject obj = JSONObject.parseObject(jsonStr); // 将JSON字符串转换成object
 		Cart cart = new Cart();
-		cart.setUsersid(obj.getString("userid"));
+		cart.setUsersid(currentUserId());
 		cart.setAddtime(VeDate.getStringDateShort());
 		cart.setFoodsid(obj.getString("foodsid"));
 		cart.setNum(obj.getString("num"));
-		cart.setPrice(obj.getString("price"));
+		Foods selectedFood = this.foodsService.getFoodsById(obj.getString("foodsid"));
+        int quantity;
+        try { quantity = Integer.parseInt(obj.getString("num")); } catch (Exception exception) { throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "数量不正确"); }
+        if (selectedFood == null || quantity < 1 || quantity > 99) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "菜品或数量不正确");
+        cart.setPrice(selectedFood.getPrice());
 		int num = this.cartService.insertCart(cart);
 		if (num > 0) {
 			map.put("success", true);
@@ -381,12 +410,13 @@ public class IndexController extends BaseController {
 	}
 
 	// 购物结算
+	@org.springframework.transaction.annotation.Transactional
 	@RequestMapping(value = "checkout.action", method = RequestMethod.POST)
 	public Map<String, Object> checkout(@RequestBody String jsonStr) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		JSONObject obj = JSONObject.parseObject(jsonStr); // 将JSON字符串转换成object
 		Cart cart1 = new Cart();
-		cart1.setUsersid(obj.getString("userid"));
+		cart1.setUsersid(currentUserId());
 		List<Cart> cartList = this.cartService.getCartByCond(cart1);
 		int num = -1;
 		if (cartList.size() == 0) {
@@ -403,12 +433,12 @@ public class IndexController extends BaseController {
 				details.setFoodsid(cart.getFoodsid());
 				details.setNum(cart.getNum());
 				details.setOrdercode(ordercode);
-				details.setPrice(cart.getPrice());
+				details.setPrice(this.foodsService.getFoodsById(cart.getFoodsid()).getPrice());
 				this.detailsService.insertDetails(details);
 				Foods foods = this.foodsService.getFoodsById(cart.getFoodsid());
 				foods.setSellnum("" + (Integer.parseInt(foods.getSellnum()) + Integer.parseInt(cart.getNum())));
 				this.foodsService.updateFoods(foods);
-				total += Double.parseDouble(cart.getPrice()) * Double.parseDouble(cart.getNum());
+				total += Double.parseDouble(foods.getPrice()) * Double.parseDouble(cart.getNum());
 				this.cartService.deleteCart(cart.getCartid());
 			}
 			Orders orders = new Orders();
@@ -419,7 +449,7 @@ public class IndexController extends BaseController {
 			orders.setReceiver(obj.getString("receiver"));
 			orders.setStatus("待付款");
 			orders.setTotal("" + VeDate.getDouble(total));
-			orders.setUsersid(obj.getString("userid"));
+			orders.setUsersid(currentUserId());
 			num = this.ordersService.insertOrders(orders);
 		}
 		if (num > 0) {
@@ -435,94 +465,28 @@ public class IndexController extends BaseController {
 	}
 
 	// 确认收货
-	@RequestMapping(value = "over.action")
-	public Map<String, Object> over(String id) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Orders orders = this.ordersService.getOrdersById(id);
-		if (!"配送中".equals(orders.getStatus())) {
-			map.put("success", false);
-			map.put("message", "只有配送中的订单才能确认完成");
-			return map;
-		}
-		orders.setStatus("已完成");
-		int num = this.ordersService.updateOrders(orders);
-		if (num > 0) {
-			map.put("success", true);
-			map.put("code", num);
-			map.put("message", "收货成功");
-		} else {
-			map.put("success", false);
-			map.put("code", num);
-			map.put("message", "收货失败");
-		}
-		return map;
-	}
+    @PostMapping("over.action")
+    public Map<String, Object> over(String id) {
+        return workflow.act(id, "complete", "", "user", currentUserId());
+    }
 
 	// 付款
-	@RequestMapping(value = "pay.action")
-	public Map<String, Object> pay(String id) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Orders orders = this.ordersService.getOrdersById(id);
-		if (!"待付款".equals(orders.getStatus())) {
-			map.put("success", false);
-			map.put("message", "当前订单不能付款");
-			return map;
-		}
-		orders.setStatus("已付款");
-		int num = this.ordersService.updateOrders(orders);
-		if (num > 0) {
-			map.put("success", true);
-			map.put("code", num);
-			map.put("message", "付款成功");
-		} else {
-			map.put("success", false);
-			map.put("code", num);
-			map.put("message", "付款失败");
-		}
-		return map;
-	}
+    @PostMapping("pay.action")
+    public Map<String, Object> pay(String id) {
+        return workflow.act(id, "pay", "", "user", currentUserId());
+    }
 
 	// 取消订单
-	@RequestMapping(value = "cancel.action")
-	public Map<String, Object> cancel(String id) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Orders orders = this.ordersService.getOrdersById(id);
-		if (!"待付款".equals(orders.getStatus()) && !"已付款".equals(orders.getStatus())) {
-			map.put("success", false);
-			map.put("message", "当前订单不能取消");
-			return map;
-		}
-		orders.setStatus("已取消");
-		int num = this.ordersService.updateOrders(orders);
-		if (num > 0) {
-			map.put("success", true);
-			map.put("code", num);
-			map.put("message", "取消成功");
-		} else {
-			map.put("success", false);
-			map.put("code", num);
-			map.put("message", "取消失败");
-		}
-		return map;
-	}
+    @PostMapping("cancel.action")
+    public Map<String, Object> cancel(String id) {
+        return workflow.act(id, "cancel", "", "user", currentUserId());
+    }
 
 	// 申请退款
-	@RequestMapping(value = "refund.action")
-	public Map<String, Object> refund(String id) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Orders orders = this.ordersService.getOrdersById(id);
-		if (orders == null || (!"已付款".equals(orders.getStatus()) && !"已接单".equals(orders.getStatus()))) {
-			map.put("success", false);
-			map.put("message", "当前订单不能申请退款");
-			return map;
-		}
-		orders.setStatus("退款中");
-		int num = this.ordersService.updateOrders(orders);
-		map.put("success", num > 0);
-		map.put("code", num);
-		map.put("message", num > 0 ? "退款申请已提交" : "退款申请失败");
-		return map;
-	}
+    @PostMapping("refund.action")
+    public Map<String, Object> refund(String id, @RequestParam(defaultValue = "") String reason) {
+        return workflow.act(id, "refund", reason, "user", currentUserId());
+    }
 
 	@RequestMapping(value = "prePay.action")
 	public Map<String, Object> prePay(String id) {
@@ -793,6 +757,7 @@ public class IndexController extends BaseController {
 		Map<String, Object> map = new HashMap<String, Object>();
 		JSONObject obj = JSONObject.parseObject(jsonStr); // 将JSON字符串转换成object
 		Orders orders = this.ordersService.getOrdersById(obj.getString("ordersid"));
+        if (orders == null || !currentUserId().equals(orders.getUsersid()) || !"已完成".equals(orders.getStatus())) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "只能评价自己的已完成订单");
 		if (orders == null || !"已完成".equals(orders.getStatus())) {
 			map.put("success", false);
 			map.put("message", "只有已完成的订单才能评价");

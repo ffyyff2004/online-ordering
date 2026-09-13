@@ -42,7 +42,8 @@ public class LoginController extends BaseController {
 			map.put("message", "用户名不存在");
 		} else {
 			Admin admin = adminlist.get(0);
-			if (password.equals(admin.getPassword())) {
+			if (password != null && password.equals(admin.getPassword())) {
+                getRequest().changeSessionId();
 				session.setAttribute("adminUserId", admin.getAdminid());
 				session.setAttribute("adminUsername", admin.getUsername());
 				session.setAttribute("adminRealname", admin.getRealname());

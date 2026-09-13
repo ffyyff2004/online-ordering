@@ -107,6 +107,7 @@
 </body>
 <script type="text/javascript" src="../admin/asset/js/jquery.js"></script>
 <script type="text/javascript" src="../admin/asset/js/axios.min.js"></script>
+<script src="../order-access.js"></script>
 <script type="text/javascript" src="../admin/asset/js/vue.js"></script>
 <script type="text/javascript ">
     const vue = new Vue({ // 实例化Vue对象
@@ -134,7 +135,7 @@
             deleteCart: function(cartid) { // 根据主键删除管理员信息
                 let _this = this;
                 if (window.confirm('确定要删除这条记录吗？')) {
-                    axios.get('http://localhost:8080/vue_wsdcxt/index/deletecart.action?id=' + cartid).then(result => {
+                    axios.post('http://localhost:8080/vue_wsdcxt/index/deletecart.action?id=' + cartid).then(result => {
                         if (result.data.code > 0) {
                             _this.loadPage();
                         } else {

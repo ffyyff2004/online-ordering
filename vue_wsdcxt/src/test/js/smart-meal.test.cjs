@@ -111,6 +111,9 @@ test('homepage keeps Chinese, four-column grid, and no raw assistant interpolati
     assert.match(html, /网上订餐系统/);
     assert.match(html, /smart-food-grid/);
     assert.match(html, /v-for="group in smartGroups"/);
-    assert.doesNotMatch(html, /\{\{\s*(smartMessage|item\.foodsname|item\.price|item\.reason)/);
+    const assistantCard = html.match(/<article class="smart-meal-card"[\s\S]*?<\/article>/);
+    assert.ok(assistantCard);
+    assert.doesNotMatch(assistantCard[0], /\{\{\s*(item\.foodsname|item\.price|item\.reason)/);
+    assert.doesNotMatch(html, /\{\{\s*smartMessage/);
     assert.doesNotMatch(html, /缃戜笂|鏅鸿兘|\uFFFD/);
 });
